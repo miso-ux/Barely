@@ -157,3 +157,19 @@ class ProductInactive(DomainError):
 
 class AlreadyPaid(DomainError):
     message_key = "error.already_paid"
+
+
+class NoInvoiceItems(DomainError):
+    message_key = "error.no_invoice_items"
+
+
+class ItemNotBillable(DomainError):
+    message_key = "error.item_not_billable"
+
+
+class InvoiceLocked(DomainError):
+    message_key = "error.invoice_locked"
+
+
+class InvalidInvoiceTransition(DomainError):
+    message_key = "error.invalid_invoice_transition"

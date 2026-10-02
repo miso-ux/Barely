@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ t('invoice.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('invoice.title') if see_all else t('invoice.my_title') }}</h1>
+  {% if can_draft %}<a href="/invoices/new" role="button">{{ t('invoice.new') }}</a>{% endif %}
+</div>
+
+<form method="get" action="/invoices" class="grid filters-form">
+  <select name="status">
+    <option value="">{{ t('common.all') }}</option>
+    {% for s in statuses %}
+      <option value="{{ s.value }}" {% if selected == s %}selected{% endif %}>{{ t('invoice.status.' ~ s.value) }}</option>
+    {% endfor %}
+  </select>
+  {% if see_all %}<input type="text" name="user" placeholder="{{ t('invoice.customer') }}" value="{{ filter_user }}">{% endif %}
+  <button type="submit" class="outline">{{ t('common.filter') }}</button>
+</form>
+
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>{{ t('invoice.number') }}</th>
+      <th>{{ t('invoice.kind') }}</th>
+      {% if see_all %}<th>{{ t('invoice.customer') }}</th>{% endif %}
+      <th>{{ t('pumps.total') }}</th>
+      <th>{{ t('invoice.status') }}</th>
+      <th>{{ t('orders.created_at') }}</th>
+      <th>{{ t('pumps.payment') }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for inv in invoices %}
+    <tr>
+      <td><a href="/invoices/{{ inv.id }}">{{ inv.number or ('#' ~ inv.id ~ ' ' ~ t('invoice.pdf.draft')) }}</a></td>
+      <td>{{ t('invoice.kind.' ~ inv.kind.value) }}</td>
+      {% if see_all %}<td>{{ inv.customer.display_name }} <small class="muted">{{ inv.customer.username }}</small></td>{% endif %}
+      <td>{{ inv.total }} €</td>
+      <td><span class="badge badge-inv-{{ inv.status.value }}">{{ t('invoice.status.' ~ inv.status.value) }}</span></td>
+      <td>{{ inv.created_at | dt }}</td>
+      <td>{% if inv.paid_at %}{{ t('pumps.paid_on', when=inv.paid_at | dt) }}{% elif inv.status.value in ('issued', 'sent') and inv.kind.value == 'invoice' %}<span class="muted">{{ t('pumps.unpaid') }}</span>{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="muted">{{ t('invoice.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

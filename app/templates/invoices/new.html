@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ t('invoice.new') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<h1>{{ t('invoice.new') }}</h1>
+<p>{{ t('invoice.new_help') }}</p>
+
+{% for group in groups %}
+<article>
+  <h3>{{ group.customer.display_name }} <small class="muted">{{ group.customer.username }}</small></h3>
+  <form method="post" action="/invoices/new">
+    <input type="hidden" name="customer_id" value="{{ group.customer.id }}">
+    <table>
+      <thead><tr><th></th><th>{{ t('invoice.item') }}</th><th>{{ t('orders.quantity') }}</th><th>{{ t('pumps.unit_price') }}</th><th>{{ t('pumps.total') }}</th></tr></thead>
+      <tbody>
+        {% for item in group['items'] %}
+        <tr>
+          <td><input type="checkbox" name="refs" value="{{ item.ref }}" checked></td>
+          <td>{{ item.description }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.unit_price }} €</td>
+          <td>{{ item.amount }} €</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="grid">
+      <input type="text" name="note" placeholder="{{ t('orders.note') }}">
+      <button type="submit">{{ t('invoice.create_button') }}</button>
+    </div>
+  </form>
+</article>
+{% else %}
+<p class="muted">{{ t('invoice.nothing_billable') }}</p>
+{% endfor %}
+<p><a href="/invoices">{{ t('common.back') }}</a></p>
+{% endblock %}

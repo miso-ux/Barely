@@ -87,8 +87,12 @@ def _close_order_if_done(db: Session, loan: Loan) -> None:
     orders.close_if_all_returned(db, loan.order)
 
 
-def record_payment(db: Session, *, actor: User, penalty: Penalty, note: str = "") -> Penalty:
-    """FR-VR-05/06: mark paid. Paying for a barrel that is still out marks it lost (BR-06)."""
+def record_payment(
+    db: Session, *, actor: User, penalty: Penalty, note: str = "", commit: bool = True
+) -> Penalty:
+    """FR-VR-05/06: mark paid. Paying for a barrel that is still out marks it lost (BR-06).
+
+    `commit=False` lets an invoice payment settle several penalties in one transaction."""
     if penalty.status is not PenaltyStatus.UNPAID:
         raise InvalidPenaltyTransition(status=penalty.status.value)
     penalty.status = PenaltyStatus.PAID
@@ -124,7 +128,8 @@ def record_payment(db: Session, *, actor: User, penalty: Penalty, note: str = ""
     notifications.notify(
         db, penalty.user, "notification.penalty.paid", _params(penalty), "/penalties"
     )
-    db.commit()
+    if commit:
+        db.commit()
     return penalty
 
 

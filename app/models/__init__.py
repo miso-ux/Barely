@@ -3,6 +3,15 @@
 from app.db import Base
 from app.models.audit import AuditLog
 from app.models.barrel import Barrel, BarrelStatus, BarrelStatusHistory
+from app.models.invoice import (
+    ACTIVE_INVOICE_STATUSES,
+    Invoice,
+    InvoiceItem,
+    InvoiceItemType,
+    InvoiceKind,
+    InvoiceNumberSequence,
+    InvoiceStatus,
+)
 from app.models.order import (
     ExceptionRequest,
     ExceptionRequestStatus,
@@ -20,7 +29,14 @@ from app.models.setting import Setting
 from app.models.user import CustomerType, User
 
 __all__ = [
+    "ACTIVE_INVOICE_STATUSES",
     "AuditLog",
+    "Invoice",
+    "InvoiceItem",
+    "InvoiceItemType",
+    "InvoiceKind",
+    "InvoiceNumberSequence",
+    "InvoiceStatus",
     "Barrel",
     "BarrelStatus",
     "BarrelStatusHistory",

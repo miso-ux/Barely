@@ -9,6 +9,11 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /srv
 
+# DejaVu fonts give the invoice PDF Slovak diacritics (fpdf2 core fonts are Latin-1 only).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies first so this layer is cached between code changes.
 # Dev group (pytest, ruff) is included on purpose: tests and lint run inside this image.
 COPY pyproject.toml uv.lock ./

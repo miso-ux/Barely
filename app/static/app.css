@@ -42,6 +42,10 @@ table code { font-size: 0.8em; white-space: pre-wrap; word-break: break-word; }
 .badge-pen-unpaid { background: #c62828; color: #fff; }
 .badge-pen-paid { background: #2e7d32; color: #fff; }
 .badge-pen-cancelled { background: #9e9e9e; color: #fff; }
+.badge-inv-draft { background: #f9a825; color: #000; }
+.badge-inv-issued { background: #1565c0; color: #fff; }
+.badge-inv-sent { background: #2e7d32; color: #fff; }
+.badge-inv-cancelled { background: #9e9e9e; color: #fff; }
 input.small { width: 12rem; display: inline-block; margin: 0 0.25rem 0.25rem 0; padding: 0.25rem 0.5rem; height: auto; }
 .inline button.outline { padding: 0.25rem 0.75rem; }
 .bell { text-decoration: none; position: relative; }

@@ -274,8 +274,10 @@ def issue_order(db: Session, *, actor: User, order: Order) -> Order:
     return order
 
 
-def record_payment(db: Session, *, actor: User, order: Order, note: str = "") -> Order:
-    """FR-PU-04 / BR-17: on-site payment recorded by the warehouse. Closes the order."""
+def record_payment(
+    db: Session, *, actor: User, order: Order, note: str = "", commit: bool = True
+) -> Order:
+    """FR-PU-04 / BR-17: payment recorded on site or through an invoice. Closes the order."""
     if order.status is not OrderStatus.ISSUED:
         raise InvalidOrderTransition(
             from_status=order.status.value, to_status=OrderStatus.CLOSED.value
@@ -304,7 +306,8 @@ def record_payment(db: Session, *, actor: User, order: Order, note: str = "") ->
         {**orders.order_params(order), "total": f"{order.total_price:.2f}"},
         f"/orders/{order.id}",
     )
-    db.commit()
+    if commit:
+        db.commit()
     return order
 
 

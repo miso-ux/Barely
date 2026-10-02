@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ invoice.number or t('invoice.pdf.draft') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<hgroup>
+  <h1>{{ t('invoice.kind.' ~ invoice.kind.value) }} {{ invoice.number or ('#' ~ invoice.id) }}
+    <span class="badge badge-inv-{{ invoice.status.value }}">{{ t('invoice.status.' ~ invoice.status.value) }}</span>
+  </h1>
+  <p>{{ invoice.customer.display_name }} <small class="muted">{{ invoice.customer.username }}</small> · {{ t('pumps.total') }}: <strong>{{ invoice.total }} €</strong></p>
+</hgroup>
+
+<p class="flash flash-warning">{{ t('invoice.pdf.demo_banner') }}</p>
+
+{% if invoice.cancels %}<p>{{ t('invoice.cancels') }} <a href="/invoices/{{ invoice.cancels.id }}">{{ invoice.cancels.number }}</a></p>{% endif %}
+{% if invoice.note %}<p><em>{{ invoice.note }}</em></p>{% endif %}
+
+<div class="actions">
+  <a href="/invoices/{{ invoice.id }}/pdf" role="button" class="outline" target="_blank">{{ t('invoice.pdf_button') }}</a>
+  {% if can_issue %}<form method="post" action="/invoices/{{ invoice.id }}/issue" class="inline"><button type="submit">{{ t('invoice.issue') }}</button></form>{% endif %}
+  {% if can_send %}<form method="post" action="/invoices/{{ invoice.id }}/send" class="inline"><button type="submit">{{ t('invoice.send') }}</button></form>{% endif %}
+</div>
+
+{% if can_pay %}
+<form method="post" action="/invoices/{{ invoice.id }}/pay" class="grid">
+  <input type="text" name="note" placeholder="{{ t('penalties.payment_note') }}">
+  <button type="submit" class="secondary">{{ t('invoice.pay') }}</button>
+</form>
+{% endif %}
+{% if invoice.paid_at %}<p>{{ t('pumps.paid_on', when=invoice.paid_at | dt) }}{% if invoice.payment_note %} · {{ invoice.payment_note }}{% endif %}</p>{% endif %}
+
+<section>
+  <h2>{{ t('invoice.items') }}</h2>
+  <table>
+    <thead><tr><th>{{ t('invoice.item') }}</th><th>{{ t('orders.quantity') }}</th><th>{{ t('pumps.unit_price') }}</th><th>{{ t('pumps.total') }}</th>{% if can_edit %}<th></th>{% endif %}</tr></thead>
+    <tbody>
+      {% for item in invoice.visible_items %}
+      <tr>
+        <td>{{ item.description }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.unit_price }} €</td>
+        <td>{{ item.amount }} €</td>
+        {% if can_edit %}<td><form method="post" action="/invoices/{{ invoice.id }}/items/{{ item.id }}/remove" class="inline"><button type="submit" class="outline secondary">{{ t('invoice.remove_item') }}</button></form></td>{% endif %}
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">{{ t('invoice.no_items') }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% if can_edit and billable %}
+<section>
+  <h3>{{ t('invoice.add_items') }}</h3>
+  <form method="post" action="/invoices/{{ invoice.id }}/items">
+    {% for item in billable %}
+      <label><input type="checkbox" name="refs" value="{{ item.ref }}"> {{ item.description }} · {{ item.amount }} €</label>
+    {% endfor %}
+    <button type="submit" class="outline">{{ t('invoice.add_button') }}</button>
+  </form>
+</section>
+{% endif %}
+
+{% if can_cancel %}
+<section>
+  <h3>{{ t('invoice.cancel') }}</h3>
+  <form method="post" action="/invoices/{{ invoice.id }}/cancel" class="grid">
+    <input type="text" name="reason" placeholder="{{ t('penalties.cancel_reason') }}" required>
+    <button type="submit" class="secondary outline">{{ t('invoice.cancel') }}</button>
+  </form>
+  <p><small>{{ t('invoice.cancel_help') }}</small></p>
+</section>
+{% endif %}
+
+<section>
+  <h2>{{ t('orders.timeline') }}</h2>
+  <table>
+    <tbody>
+      <tr><th>{{ t('orders.step.created') }}</th><td>{{ invoice.created_at | dt }}</td><td>{{ invoice.creator.username if invoice.creator else '' }}</td></tr>
+      {% if invoice.issued_at %}<tr><th>{{ t('invoice.issued_at') }}</th><td>{{ invoice.issued_at | dt }}</td><td>{{ invoice.issuer.username if invoice.issuer else '' }}</td></tr>{% endif %}
+      {% if invoice.sent_at %}<tr><th>{{ t('invoice.sent_at') }}</th><td>{{ invoice.sent_at | dt }}</td><td></td></tr>{% endif %}
+      {% if invoice.cancelled_at %}<tr><th>{{ t('orders.step.cancelled') }}</th><td>{{ invoice.cancelled_at | dt }}</td><td>{{ invoice.cancel_reason }}</td></tr>{% endif %}
+      {% if invoice.paid_at %}<tr><th>{{ t('pumps.payment') }}</th><td>{{ invoice.paid_at | dt }}</td><td>{{ invoice.payment_note or '' }}</td></tr>{% endif %}
+    </tbody>
+  </table>
+</section>
+
+{% set related = credit_notes | selectattr('cancels_invoice_id', 'equalto', invoice.id) | list %}
+{% if related %}
+<p>{{ t('invoice.cancelled_by_note') }} {% for cn in related %}<a href="/invoices/{{ cn.id }}">{{ cn.number }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+{% endif %}
+
+<p><a href="/invoices">{{ t('common.back') }}</a></p>
+{% endblock %}

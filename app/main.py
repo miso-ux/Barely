@@ -26,6 +26,7 @@ from app.routers import (
     barrels,
     dashboard,
     exceptions,
+    invoices,
     notifications,
     orders,
     penalties,
@@ -84,6 +85,7 @@ app.include_router(exceptions.router)
 app.include_router(notifications.router)
 app.include_router(penalties.router)
 app.include_router(pumps.router)
+app.include_router(invoices.router)
 
 
 @app.exception_handler(NotAuthenticated)
