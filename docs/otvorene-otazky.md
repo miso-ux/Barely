@@ -1,6 +1,6 @@
 # Otvorené otázky
 
-Projekt: Evidencia a výdaj barelov s vodou. Stav k 2. 10. 2026. Q-01 a Q-02 sú vyriešené (ID sa nepoužíva znova).
+Projekt: Evidencia a výdaj barelov s vodou. Stav k 2. 10. 2026. Q-01, Q-02, Q-07 a Q-08 sú vyriešené (ID sa nepoužíva znova).
 Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.md`.
 
 ## Ako s týmto súborom pracovať
@@ -17,8 +17,6 @@ Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.
 | Q-04 | Poškodený barel: oprava alebo odpis | Fáza 4 | Nie, návrh stačí |
 | Q-05 | Vrátenie po lehote pred zaplatením pokuty | Fáza 4 | Nie, návrh stačí |
 | Q-06 | Pumpy: typy, cena, limity | Fáza 5 | Čiastočne |
-| Q-07 | Kto mení konfiguráciu | Fáza 1 (oprávnenia) | Nie, návrh stačí |
-| Q-08 | Pomenovanie rolí | Fáza 1 (texty v UI) | Nie |
 | Q-09 | Odovzdanie faktúry a jej náležitosti | Fáza 6 | Nie pre demo |
 | Q-10 | Uchovávanie záznamov a GDPR | Pred ostrým nasadením | Nie pre demo |
 | Q-11 | Externí zákazníci | Pred ich spustením | Nie pre demo |
@@ -69,28 +67,6 @@ Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.
 **Prečo na tom záleží:** Určuje tvar katalógu a objednávky pumpy.
 
 **Návrh:** Jeden typ pumpy, cena uložená pri produkte, bez limitu okrem aktuálnej zásoby. Dátový model necháme tak, aby šlo neskôr pridať viac typov.
-
-**Rozhodnutie:** zatiaľ nie
-
----
-
-## Q-07 Kto mení konfiguráciu
-
-**Otázka:** Kto môže meniť limity, výšku pokuty, cenu výpožičky a ďalšie pravidlá?
-
-**Prečo na tom záleží:** Super admin podľa zadania nevidí prevádzku, ale tieto pravidlá prevádzku priamo ovplyvňujú. To je trochu protichodné.
-
-**Návrh:** Super admin mení konfiguráciu, Supervízor ju len číta, každá zmena ide do audit logu. Technicky to bude samostatné oprávnenie, ktoré možno neskôr dať inej role bez zásahu do kódu.
-
-**Rozhodnutie:** zatiaľ nie
-
----
-
-## Q-08 Pomenovanie rolí
-
-**Otázka:** Ako sa budú roly volať v rozhraní?
-
-**Návrh:** Skladník (alternatívy Predajca, Admin) a Supervízor (alternatívy Audítor, Kontrolór). Technické kódy zostanú `warehouse` a `supervisor`, takže ide len o texty v UI.
 
 **Rozhodnutie:** zatiaľ nie
 
@@ -159,4 +135,6 @@ Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.
 | Pokuta | 10 € za nevrátený alebo poškodený barel, po zaplatení sa barel označí ako stratený |
 | Mazanie | Nič sa nemaže, len mení stav a ukladá história |
 | Rozsah dema (býv. Q-02) | Tenký rez, fázy 1 až 4: prihlásenie a roly, sklad barelov, objednávka, výdaj s automatickým výberom barela, vrátenie, pokuta. Pumpy, faktúry a Supervízor až potom |
+| Kto mení konfiguráciu (býv. Q-07, 2. 10. 2026) | Super admin cez oprávnenie `settings.manage`, Supervízor len číta (`settings.read`), každá zmena ide do audit logu. Oprávnenie možno neskôr dať inej role bez zásahu do kódu |
+| Pomenovanie rolí (býv. Q-08, 2. 10. 2026) | V UI „Skladník" a „Supervízor". Kódy zostávajú `warehouse` a `supervisor`, názvy sú v prekladovom slovníku |
 | Technológie a prostredie (býv. Q-01, 2. 10. 2026) | Možnosť A: Python 3.12 + FastAPI, Jinja2 + HTMX, PostgreSQL 16, SQLAlchemy + Alembic, pytest, uv, Ruff. Všetko v Docker Compose (`app`, `db`), demo v Docker Desktop, neskôr Linux server. Prihlásenie meno + heslo so session, pripravené na Entra ID/Google cez Authlib (OIDC). Zamietnuté: TypeScript/Next.js, .NET/Blazor. Detail v `CLAUDE.md` kap. 8 |
