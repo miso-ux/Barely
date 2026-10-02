@@ -33,14 +33,15 @@ def _barrel(db: Session, code: str) -> Barrel:
 def test_seed_provides_demo_stock_in_every_status(db: Session) -> None:
     counts = barrels_service.status_counts(db)
     assert sum(counts.values()) == 30
-    assert counts[S.DAMAGED] == 1
+    # one damaged at the warehouse plus one returned damaged in the seeded history
+    assert counts[S.DAMAGED] == 2
     assert counts[S.LOST] == 1
     assert counts[S.RETIRED] == 1
     assert counts[S.WRITTEN_OFF] == 1
     # Seed orders issue two barrels and reserve five more pieces (see test_orders).
     assert counts[S.ON_LOAN] == 2
-    assert counts[S.IN_STOCK] == 24
-    assert stock.free_count(db) == 19
+    assert counts[S.IN_STOCK] == 23
+    assert stock.free_count(db) == 18
 
 
 def test_list_and_filter(warehouse: TestClient) -> None:
@@ -56,9 +57,9 @@ def test_warehouse_dashboard_shows_counts_and_near_limit(warehouse: TestClient) 
     page = warehouse.get("/warehouse")
     assert page.status_code == 200
     assert "Voľné barely" in page.text
-    # loan_count 8 is within 2 of the limit 10 (FR-BA-11); the two seed-issued barrels sit at
+    # Jana's returned barrels sit at 9 / 10 (FR-BA-11); the two seed-issued barrels are at
     # 10 / 10 on loan and will retire when returned.
-    assert "8 / 10" in page.text and "10 / 10" in page.text
+    assert "9 / 10" in page.text and "10 / 10" in page.text
 
 
 # --- adding barrels ---------------------------------------------------------

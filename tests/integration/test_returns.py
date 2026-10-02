@@ -71,14 +71,18 @@ def test_return_ok_puts_barrel_back_and_closes_order(client: TestClient, db: Ses
         assert loan.barrel.status is BarrelStatus.RETIRED
         assert loan.barrel.retired_at is not None
         assert loan.barrel.history[-1].loan_id == loan.id
-    assert db.scalar(select(Penalty)) is None
+    assert (
+        db.scalar(select(Penalty).where(Penalty.loan_id.in_([loan.id for loan in loans]))) is None
+    )
 
 
 def test_return_ok_below_limit_goes_to_stock(db: Session) -> None:
+    # Raise the limit so the selected barrels (the most used ones) stay below it.
+    settings_service.update(db, actor=_user(db, "admin"), key="loan_limit", raw="20")
     order = _issue_new_order(db, "peter.horvath", 2)
     warehouse = _user(db, "warehouse")
     for loan in order.loans:
-        assert loan.barrel.loan_count < 10
+        assert loan.barrel.loan_count < 20
     returns.return_barrels(
         db, actor=warehouse, order=order, conditions={loan.id: "ok" for loan in order.loans}
     )

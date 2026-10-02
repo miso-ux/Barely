@@ -16,10 +16,14 @@ from app.db import SessionLocal
 from app.models import (
     Barrel,
     BarrelStatus,
+    BarrelStatusHistory,
     CustomerType,
+    Loan,
     Order,
+    Penalty,
     Permission,
     PumpProduct,
+    PumpStockMovement,
     Role,
     RolePermission,
     User,
@@ -29,7 +33,9 @@ from app.services import audit, barrel_state, dates
 from app.services import barrels as barrels_service
 from app.services import exceptions as exceptions_service
 from app.services import orders as orders_service
+from app.services import penalties as penalties_service
 from app.services import pumps as pumps_service
+from app.services import returns as returns_service
 from app.services import settings as settings_service
 from app.services.barrel_state import Reason
 
@@ -215,7 +221,7 @@ def seed_demo_pumps(db: Session) -> int:
         db, actor=warehouse, name="Ručná pumpa na barel", price=Decimal("12.50")
     )
     pumps_service.receive_stock(
-        db, actor=warehouse, product=product, quantity=15, note="Počiatočná zásoba"
+        db, actor=warehouse, product=product, quantity=16, note="Počiatočná zásoba"
     )
     pumps_service.place_order(
         db,
@@ -225,6 +231,94 @@ def seed_demo_pumps(db: Session) -> int:
         requested_date=dates.today_local() + timedelta(days=1),
     )
     return 1
+
+
+def _backdate_history(db: Session, loans: list, *, issued_days: int, returned_days: int) -> None:
+    """Move the barrel history rows of these loans into the past so reports show a timeline."""
+    now = dates.now_utc()
+    loan_ids = [loan.id for loan in loans]
+    rows = db.scalars(
+        select(BarrelStatusHistory).where(BarrelStatusHistory.loan_id.in_(loan_ids))
+    ).all()
+    for row in rows:
+        days = issued_days if row.reason == Reason.ISSUED else returned_days
+        row.created_at = now - timedelta(days=days)
+
+
+def seed_demo_history(db: Session) -> int:
+    """Closed cycles dated in the past so reports, penalties and invoices have history:
+    Jana returned two barrels in order three weeks ago, Peter returned one damaged and paid
+    the penalty on site, and Peter bought a pump and paid for it. Created only once."""
+    if db.scalar(select(func.count()).select_from(Loan).where(Loan.returned_at.is_not(None))):
+        return 0
+    by_name = {u.username: u for u in db.scalars(select(User))}
+    warehouse = by_name["warehouse"]
+    today = dates.today_local()
+    now = dates.now_utc()
+
+    def ago(days: int):
+        return now - timedelta(days=days)
+
+    # 1. Jana: two barrels, returned in order.
+    order = orders_service.place_order(
+        db, user=by_name["jana.novakova"], quantity=2, requested_date=today
+    )
+    orders_service.mark_ready(db, actor=warehouse, order=order)
+    loans = orders_service.issue_order(db, actor=warehouse, order=order)
+    returns_service.return_barrels(
+        db,
+        actor=warehouse,
+        order=order,
+        conditions={loan.id: "ok" for loan in loans},
+        note="Bez závad",
+    )
+    order.created_at, order.ready_at, order.issued_at = ago(21), ago(20), ago(20)
+    order.closed_at = ago(10)
+    for loan in loans:
+        loan.issued_at = ago(20)
+        loan.due_date = dates.due_date_for(loan.issued_at)
+        loan.returned_at = ago(10)
+    _backdate_history(db, loans, issued_days=20, returned_days=10)
+
+    # 2. Peter: one barrel returned damaged, penalty paid on the spot.
+    order = orders_service.place_order(
+        db, user=by_name["peter.horvath"], quantity=1, requested_date=today
+    )
+    orders_service.mark_ready(db, actor=warehouse, order=order)
+    loans = orders_service.issue_order(db, actor=warehouse, order=order)
+    returns_service.return_barrels(
+        db,
+        actor=warehouse,
+        order=order,
+        conditions={loans[0].id: "damaged"},
+        note="Prasknuté dno",
+    )
+    penalty = db.scalar(select(Penalty).where(Penalty.loan_id == loans[0].id))
+    penalties_service.record_payment(db, actor=warehouse, penalty=penalty, note="Hotovosť")
+    order.created_at, order.ready_at, order.issued_at = ago(15), ago(15), ago(15)
+    order.closed_at = ago(8)
+    loans[0].issued_at = ago(15)
+    loans[0].due_date = dates.due_date_for(loans[0].issued_at)
+    loans[0].returned_at = ago(8)
+    penalty.created_at, penalty.paid_at = ago(8), ago(7)
+    _backdate_history(db, loans, issued_days=15, returned_days=8)
+
+    # 3. Peter: a pump bought and paid three weeks ago.
+    product = db.scalar(select(PumpProduct).order_by(PumpProduct.id))
+    pump_order = pumps_service.place_order(
+        db, user=by_name["peter.horvath"], product=product, quantity=1, requested_date=today
+    )
+    orders_service.mark_ready(db, actor=warehouse, order=pump_order)
+    pumps_service.issue_order(db, actor=warehouse, order=pump_order)
+    pumps_service.record_payment(db, actor=warehouse, order=pump_order, note="Karta")
+    pump_order.created_at, pump_order.ready_at = ago(21), ago(20)
+    pump_order.issued_at, pump_order.paid_at, pump_order.closed_at = ago(20), ago(20), ago(20)
+    for movement in db.scalars(
+        select(PumpStockMovement).where(PumpStockMovement.order_id == pump_order.id)
+    ):
+        movement.created_at = ago(20)
+    db.commit()
+    return 3
 
 
 def run(quiet: bool = False) -> None:
@@ -239,11 +333,12 @@ def run(quiet: bool = False) -> None:
         barrels_created = seed_demo_barrels(db)
         orders_created = seed_demo_orders(db)
         pumps_created = seed_demo_pumps(db)
+        history_created = seed_demo_history(db)
     if not quiet:
         print(
             f"seed: roles and permissions synced, {created} demo user(s) created, "
             f"{barrels_created} demo barrel(s) created, {orders_created} demo order(s) created, "
-            f"{pumps_created} pump product(s) created"
+            f"{pumps_created} pump product(s) created, {history_created} closed cycle(s) created"
         )
 
 

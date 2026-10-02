@@ -34,7 +34,13 @@ def test_movements_report_lists_seed_changes_with_filters(db: Session) -> None:
     reasons = {row["reason"] for row in table.rows}
     assert {"Zaradenie do evidencie", "Vydanie", "Strata", "Odpis"} <= reasons
     only_issued = reports_service.movements(db, _filters(reason="issued"))
-    assert len(only_issued.rows) == 3  # two seed barrels + the retired demo barrel
+    # two barrels to `user`, the retired demo barrel, two to jana and one to peter (history)
+    assert len(only_issued.rows) == 6
+    # Backdated history shows up in the right window.
+    older = reports_service.movements(
+        db, _filters(date_from=TODAY - timedelta(days=25), date_to=TODAY - timedelta(days=5))
+    )
+    assert {"Vydanie", "Vrátenie", "Vrátenie poškodeného"} <= {r["reason"] for r in older.rows}
     by_barrel = reports_service.movements(db, _filters(barrel="B-0030"))
     assert all(row["barrel"] == "B-0030" for row in by_barrel.rows)
     by_customer = reports_service.movements(db, _filters(user="user", reason="issued"))
@@ -53,7 +59,7 @@ def test_environmental_report(db: Session) -> None:
 
 def test_stock_and_debtors_reports(db: Session) -> None:
     table = reports_service.stock(db, _filters(status="in_stock"))
-    assert len(table.rows) == 24 and all(r["age_days"] >= 0 for r in table.rows)
+    assert len(table.rows) == 23 and all(r["age_days"] >= 0 for r in table.rows)
     daily.run_with_session(db, today=TODAY)
     debtors = reports_service.debtors_table(db, _filters())
     assert [r["user"] for r in debtors.rows] == ["user"]
@@ -63,7 +69,8 @@ def test_stock_and_debtors_reports(db: Session) -> None:
 def test_roles_report_counts_warehouse_work(db: Session) -> None:
     table = reports_service.roles_work(db, _filters())
     row = next(r for r in table.rows if r["actor"] == "warehouse")
-    assert row["prepared"] == 1 and row["issued"] == 1
+    assert row["prepared"] == 3 and row["issued"] == 3  # seed: user + jana + peter
+    assert row["returns"] == 3
     assert row["avg_issue_hours"] != ""
 
 

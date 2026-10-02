@@ -45,7 +45,8 @@ def _product(db: Session) -> PumpProduct:
 
 def _pump_order(db: Session) -> Order:
     db.expire_all()
-    return db.scalar(select(Order).where(Order.kind == OrderKind.PUMP).order_by(Order.id.desc()))
+    # The first pump order in the seed is Peter's pending one; later ones are closed history.
+    return db.scalar(select(Order).where(Order.kind == OrderKind.PUMP).order_by(Order.id))
 
 
 # --- seed and catalogue -----------------------------------------------------
@@ -123,7 +124,8 @@ def test_user_orders_pump_and_warehouse_is_notified(client: TestClient, db: Sess
         data={"product_id": str(product.id), "quantity": "2", "requested_date": TOMORROW},
     )
     assert response.status_code == 303, response.text
-    order = _pump_order(db)
+    db.expire_all()
+    order = db.scalar(select(Order).where(Order.kind == OrderKind.PUMP).order_by(Order.id.desc()))
     assert order.kind is OrderKind.PUMP and order.product_id == product.id
     assert order.status is OrderStatus.PENDING and order.unit_price is None
     assert pumps_service.free(db, product) == 12

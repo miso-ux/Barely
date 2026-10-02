@@ -3,34 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b6fb3">
   <title>{% block title %}{{ t('app.title') }}{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%A7%3C/text%3E%3C/svg%3E">
   {# Root-relative paths on purpose: absolute url_for() URLs break behind an HTTPS reverse proxy. #}
   <link rel="stylesheet" href="/static/pico.min.css">
   <link rel="stylesheet" href="/static/app.css">
   <script src="/static/htmx.min.js" defer></script>
 </head>
 <body>
-  <header class="container">
-    <nav>
+  <header class="site-header">
+    <nav class="container">
       <ul>
-        <li><strong><a href="/">{{ t('app.title') }}</a></strong></li>
+        <li><a href="/" class="brand">&#128167; <strong>{{ t('app.title') }}</strong></a></li>
       </ul>
+      {% if current_user %}
+      <ul class="main-nav">
+        {% for item in nav_items %}
+          <li><a href="{{ item.href }}" {% if item.is_active(current_path) %}aria-current="page"{% endif %}>{{ t(item.label) }}</a></li>
+        {% endfor %}
+      </ul>
+      <ul class="user-nav">
+        <li class="mobile-only">
+          <details class="dropdown">
+            <summary aria-label="{{ t('nav.menu') }}">&#9776;</summary>
+            <ul>
+              {% for item in nav_items %}
+                <li><a href="{{ item.href }}" {% if item.is_active(current_path) %}aria-current="page"{% endif %}>{{ t(item.label) }}</a></li>
+              {% endfor %}
+            </ul>
+          </details>
+        </li>
+        <li>
+          <a href="/notifications" class="bell" title="{{ t('nav.notifications') }}" aria-label="{{ t('nav.notifications') }}">&#128276;{% if unread_notifications %}<span class="pill">{{ unread_notifications }}</span>{% endif %}</a>
+        </li>
+        <li>
+          <details class="dropdown user-menu">
+            <summary>{{ current_user.display_name }}</summary>
+            <ul>
+              <li><small class="muted">{% for role in current_user.roles %}{{ t(role.name_key) }}{% if not loop.last %}, {% endif %}{% endfor %}</small></li>
+              <li><a href="/password">{{ t('nav.password') }}</a></li>
+              <li>
+                <form method="post" action="/logout" class="inline">
+                  <button type="submit" class="link">{{ t('nav.logout') }}</button>
+                </form>
+              </li>
+            </ul>
+          </details>
+        </li>
+      </ul>
+      {% else %}
       <ul>
-        {% if current_user %}
-          <li>
-            <a href="/notifications" class="bell" title="{{ t('nav.notifications') }}">&#128276;{% if unread_notifications %}<span class="pill">{{ unread_notifications }}</span>{% endif %}</a>
-          </li>
-          <li class="muted">{{ current_user.display_name }}</li>
-          <li><a href="/password">{{ t('nav.password') }}</a></li>
-          <li>
-            <form method="post" action="/logout" class="inline">
-              <button type="submit" class="outline secondary">{{ t('nav.logout') }}</button>
-            </form>
-          </li>
-        {% else %}
-          <li><a href="/login">{{ t('nav.login') }}</a></li>
-        {% endif %}
+        <li><a href="/login">{{ t('nav.login') }}</a></li>
       </ul>
+      {% endif %}
     </nav>
   </header>
   <main class="container">
@@ -39,5 +65,8 @@
     {% endfor %}
     {% block content %}{% endblock %}
   </main>
+  <footer class="container site-footer">
+    <small class="muted">{{ t('app.footer') }}</small>
+  </footer>
 </body>
 </html>

@@ -56,12 +56,12 @@ def _post_order(client: TestClient, quantity: int, date: str = TOMORROW, note: s
 
 def test_seed_orders_and_reservations(db: Session) -> None:
     statuses = sorted(o.status.value for o in db.scalars(select(Order)))
-    # three barrel orders plus one pending pump order from the seed
-    assert statuses == ["issued", "pending", "pending", "pending"]
+    # three barrel orders, one pending pump order and three closed history cycles
+    assert statuses == ["closed", "closed", "closed", "issued", "pending", "pending", "pending"]
     assert stock.reserved_count(db) == 5
-    # 26 in stock before seed orders, 2 issued -> 24 in stock, 5 reserved -> 19 free
-    assert stock.in_stock_count(db) == 24
-    assert stock.free_count(db) == 19
+    # 26 in stock before orders, 2 issued, 1 returned damaged -> 23 in stock, 5 reserved
+    assert stock.in_stock_count(db) == 23
+    assert stock.free_count(db) == 18
 
 
 # --- creating orders ----------------------------------------------------------
@@ -96,10 +96,10 @@ def test_order_limit_is_enforced(client: TestClient) -> None:
 def test_order_cannot_exceed_free_barrels(client: TestClient, db: Session) -> None:
     login(client, "user")
     settings_service.update(db, actor=_user(db, "admin"), key="max_items_per_order", raw="50")
-    response = _post_order(client, 20)  # 19 free
+    response = _post_order(client, 20)  # 18 free
     assert response.status_code == 400
-    assert "Voľných je 19" in response.text
-    assert _post_order(client, 19).status_code == 303
+    assert "Voľných je 18" in response.text
+    assert _post_order(client, 18).status_code == 303
     assert stock.free_count(db) == 0
 
 

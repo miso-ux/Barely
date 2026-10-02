@@ -176,7 +176,7 @@ def test_paying_damage_penalty_does_not_touch_barrel(db: Session) -> None:
 
 def test_cancel_penalty_requires_reason_and_keeps_record(client: TestClient, db: Session) -> None:
     daily.run_with_session(db, today=TODAY)
-    penalty = db.scalar(select(Penalty))
+    penalty = db.scalar(select(Penalty).where(Penalty.status == PenaltyStatus.UNPAID))
     warehouse = _user(db, "warehouse")
     with pytest.raises(ReasonRequired):
         penalties_service.cancel_penalty(db, actor=warehouse, penalty=penalty, reason="  ")
@@ -196,7 +196,7 @@ def test_cancel_penalty_requires_reason_and_keeps_record(client: TestClient, db:
 
 def test_user_sees_own_penalties_only(client: TestClient, db: Session) -> None:
     daily.run_with_session(db, today=TODAY)
-    penalty = db.scalar(select(Penalty))
+    penalty = db.scalar(select(Penalty).where(Penalty.status == PenaltyStatus.UNPAID))
     login(client, "user")
     page = client.get("/penalties")
     assert page.status_code == 200

@@ -2,16 +2,18 @@
 {% block title %}{{ t('auth.login_title') }} · {{ t('app.title') }}{% endblock %}
 
 {% block content %}
+<div class="login-hero">
+  <div class="drop">&#128167;</div>
+  <h1>{{ t('app.title') }}</h1>
+  <p class="muted">{{ t('app.tagline') }}</p>
+</div>
 <article class="narrow">
-  <hgroup>
-    <h1>{{ t('auth.login_title') }}</h1>
-    <p>{{ t('app.tagline') }}</p>
-  </hgroup>
+  <h2>{{ t('auth.login_title') }}</h2>
   {% if error %}<p class="error-text" role="alert">{{ error }}</p>{% endif %}
   <form method="post" action="/login">
     <input type="hidden" name="next" value="{{ next or '/' }}">
     <label>{{ t('auth.username') }}
-      <input type="text" name="username" value="{{ username or '' }}" autocomplete="username" required autofocus>
+      <input type="text" name="username" value="{{ username or '' }}" autocomplete="username" autocapitalize="none" required autofocus>
     </label>
     <label>{{ t('auth.password') }}
       <input type="password" name="password" autocomplete="current-password" required>
