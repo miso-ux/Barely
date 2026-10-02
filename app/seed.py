@@ -4,15 +4,26 @@ Syncs the permission catalogue and role bundles, inserts missing settings, and c
 accounts that do not exist yet. Existing accounts (and their changed passwords) are left alone.
 """
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.auth.passwords import hash_password
 from app.auth.permissions import PERMISSIONS, ROLE_PERMISSIONS, ROLES
 from app.db import SessionLocal
-from app.models import CustomerType, Permission, Role, RolePermission, User, UserRole
-from app.services import audit
+from app.models import (
+    Barrel,
+    BarrelStatus,
+    CustomerType,
+    Permission,
+    Role,
+    RolePermission,
+    User,
+    UserRole,
+)
+from app.services import audit, barrel_state
+from app.services import barrels as barrels_service
 from app.services import settings as settings_service
+from app.services.barrel_state import Reason
 
 # Demo only. Documented in README; never use real passwords here.
 DEMO_PASSWORD = "Demo1234!"
@@ -106,6 +117,47 @@ def seed_demo_users(db: Session, roles: dict[str, Role]) -> int:
     return created
 
 
+DEMO_BARREL_COUNT = 30
+
+
+def seed_demo_barrels(db: Session) -> int:
+    """Demo stock, created only when the registry is empty.
+
+    Loan counts are spread so the automatic barrel selection (phase 3) is visible, and a few
+    barrels sit in the other statuses so every state shows up on the dashboard.
+    """
+    if db.scalar(select(func.count()).select_from(Barrel)):
+        return 0
+    barrels = barrels_service.create_barrels(db, actor=None, count=DEMO_BARREL_COUNT)
+    for index, barrel in enumerate(barrels):
+        barrel.loan_count = (index * 7) % 10  # 0..9 in a scrambled order
+    S = BarrelStatus
+    barrel_state.transition(
+        db,
+        barrels[-4],
+        S.DAMAGED,
+        actor=None,
+        reason=Reason.DAMAGED,
+        note="Prasknuté hrdlo pri kontrole na sklade",
+    )
+    barrel_state.transition(
+        db, barrels[-3], S.LOST, actor=None, reason=Reason.LOST, note="Nenájdený pri inventúre"
+    )
+    barrels[-2].loan_count = 10
+    barrel_state.transition(db, barrels[-2], S.ON_LOAN, actor=None, reason=Reason.ISSUED)
+    barrel_state.transition(db, barrels[-2], S.RETIRED, actor=None, reason=Reason.RETIRED)
+    barrel_state.transition(
+        db,
+        barrels[-1],
+        S.WRITTEN_OFF,
+        actor=None,
+        reason=Reason.WRITTEN_OFF,
+        note="Poškodený pri preprave",
+    )
+    db.commit()
+    return len(barrels)
+
+
 def run(quiet: bool = False) -> None:
     with SessionLocal() as db:
         permissions = sync_permissions(db)
@@ -115,8 +167,12 @@ def run(quiet: bool = False) -> None:
         settings_service.ensure_defaults(db)
         created = seed_demo_users(db, roles)
         db.commit()
+        barrels_created = seed_demo_barrels(db)
     if not quiet:
-        print(f"seed: roles and permissions synced, {created} demo user(s) created")
+        print(
+            f"seed: roles and permissions synced, {created} demo user(s) created, "
+            f"{barrels_created} demo barrel(s) created"
+        )
 
 
 if __name__ == "__main__":

@@ -61,3 +61,23 @@ class InvalidSettingValue(DomainError):
 
 class UnknownSetting(DomainError):
     message_key = "error.unknown_setting"
+
+
+class InvalidBarrelTransition(DomainError):
+    message_key = "error.invalid_barrel_transition"
+
+
+class ReasonRequired(DomainError):
+    message_key = "error.reason_required"
+
+
+class InvalidCount(DomainError):
+    message_key = "error.invalid_count"
+
+
+class InvalidBarrelCode(DomainError):
+    message_key = "error.invalid_barrel_code"
+
+
+class BarrelCodeTaken(DomainError):
+    message_key = "error.barrel_code_taken"

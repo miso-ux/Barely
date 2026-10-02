@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ t('barrels.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('barrels.title') }}</h1>
+  <div class="actions">
+    <a href="/warehouse" role="button" class="outline">{{ t('warehouse.title') }}</a>
+    {% if can_manage %}<a href="/barrels/new" role="button">{{ t('barrels.add') }}</a>{% endif %}
+  </div>
+</div>
+
+<nav class="filters">
+  <ul>
+    <li><a href="/barrels" {% if not selected %}aria-current="page"{% endif %}>{{ t('common.all') }}</a></li>
+    {% for s in statuses %}
+      <li><a href="/barrels?status={{ s.value }}" {% if selected == s %}aria-current="page"{% endif %}>{{ t('barrel.status.' ~ s.value) }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>
+
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>{{ t('barrels.code') }}</th>
+      <th>{{ t('barrels.status') }}</th>
+      <th>{{ t('barrels.loan_count') }}</th>
+      <th>{{ t('barrels.added_at') }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for b in barrels %}
+    <tr>
+      <td><a href="/barrels/{{ b.id }}">{{ b.code }}</a></td>
+      <td><span class="badge badge-{{ b.status.value }}">{{ t('barrel.status.' ~ b.status.value) }}</span></td>
+      <td>{{ b.loan_count }} / {{ loan_limit }}</td>
+      <td>{{ b.added_at | dt }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">{{ t('barrels.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

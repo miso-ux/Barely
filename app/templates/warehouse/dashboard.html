@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ t('warehouse.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('warehouse.title') }}</h1>
+  <a href="/barrels" role="button" class="outline">{{ t('barrels.title') }}</a>
+</div>
+
+{% if low_stock %}
+  <article class="flash flash-warning">{{ t('warehouse.low_stock', free=free, threshold=threshold) }}</article>
+{% endif %}
+
+<div class="grid stats">
+  <article>
+    <h3>{{ free }}</h3>
+    <p>{{ t('warehouse.free') }}</p>
+    <small>{{ t('warehouse.free_help', in_stock=counts[statuses[0]], reserved=reserved) }}</small>
+  </article>
+  {% for s in statuses %}
+  <article>
+    <h3>{{ counts[s] }}</h3>
+    <p><a href="/barrels?status={{ s.value }}">{{ t('barrel.status.' ~ s.value) }}</a></p>
+  </article>
+  {% endfor %}
+</div>
+
+<section>
+  <h2>{{ t('warehouse.near_limit', limit=loan_limit) }}</h2>
+  {% if near_limit %}
+  <table>
+    <thead><tr><th>{{ t('barrels.code') }}</th><th>{{ t('barrels.loan_count') }}</th><th>{{ t('barrels.status') }}</th></tr></thead>
+    <tbody>
+      {% for b in near_limit %}
+      <tr>
+        <td><a href="/barrels/{{ b.id }}">{{ b.code }}</a></td>
+        <td>{{ b.loan_count }} / {{ loan_limit }}</td>
+        <td>{{ t('barrel.status.' ~ b.status.value) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">{{ t('warehouse.near_limit_empty') }}</p>
+  {% endif %}
+</section>
+
+<section class="muted">
+  <h2>{{ t('warehouse.later') }}</h2>
+  <p>{{ t('warehouse.later_help') }}</p>
+</section>
+{% endblock %}

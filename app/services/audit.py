@@ -5,8 +5,12 @@ from sqlalchemy.orm import Session
 
 from app.models import AuditLog, User
 
-# Entity types grouped by which audit permission may see them.
+# Entity types grouped by which audit permission may see them (FR-AU-02).
 USER_MANAGEMENT_ENTITIES = frozenset({"user", "setting"})
+OPERATIONS_ENTITIES = frozenset(
+    {"barrel", "order", "exception_request", "loan", "penalty", "pump", "pump_stock"}
+)
+INVOICING_ENTITIES = frozenset({"invoice"})
 
 
 def record(

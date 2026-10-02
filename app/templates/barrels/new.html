@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ t('barrels.add') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<article class="narrow">
+  <h1>{{ t('barrels.add') }}</h1>
+  <p>{{ t('barrels.add_help') }}</p>
+  {% if error %}<p class="error-text" role="alert">{{ error }}</p>{% endif %}
+  {% set form = form or {} %}
+  <form method="post" action="/barrels/new">
+    <label>{{ t('barrels.count') }}
+      <input type="number" name="count" min="1" max="500" value="{{ form.count or 1 }}" required>
+    </label>
+    <label>{{ t('barrels.custom_code') }}
+      <input type="text" name="code" value="{{ form.code or '' }}" placeholder="B-0001">
+      <small>{{ t('barrels.custom_code_help') }}</small>
+    </label>
+    <button type="submit">{{ t('barrels.add_button') }}</button>
+  </form>
+  <p><a href="/barrels">{{ t('common.back') }}</a></p>
+</article>
+{% endblock %}

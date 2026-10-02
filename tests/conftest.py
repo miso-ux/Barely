@@ -43,9 +43,11 @@ def reset_database(database):
         conn.execute(
             text(
                 "TRUNCATE audit_log, settings, user_roles, role_permissions, "
-                "users, roles, permissions RESTART IDENTITY CASCADE"
+                "users, roles, permissions, barrel_status_history, barrels "
+                "RESTART IDENTITY CASCADE"
             )
         )
+        conn.execute(text("ALTER SEQUENCE barrel_code_seq RESTART WITH 1"))
     seed.run(quiet=True)
     yield
 

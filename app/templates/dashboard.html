@@ -18,11 +18,11 @@
   {% if current_user.has_permission('settings.read') %}
     <article><h3><a href="/admin/settings">{{ t('dashboard.settings') }}</a></h3><p>{{ t('dashboard.settings_help') }}</p></article>
   {% endif %}
-  {% if current_user.has_any_permission('audit.read_users', 'audit.read_all') %}
+  {% if current_user.has_any_permission('audit.read_users', 'audit.read_operations', 'audit.read_invoicing', 'audit.read_all') %}
     <article><h3><a href="/admin/audit">{{ t('dashboard.audit') }}</a></h3><p>{{ t('dashboard.audit_help') }}</p></article>
   {% endif %}
   {% if current_user.has_permission('barrels.read') %}
-    <article class="muted"><h3>{{ t('dashboard.barrels') }}</h3><p>{{ t('dashboard.coming_phase', phase=2) }}</p></article>
+    <article><h3><a href="/warehouse">{{ t('dashboard.barrels') }}</a></h3><p>{{ t('dashboard.barrels_help') }}</p></article>
   {% endif %}
   {% if current_user.has_any_permission('orders.create', 'orders.read_all') %}
     <article class="muted"><h3>{{ t('dashboard.orders') }}</h3><p>{{ t('dashboard.coming_phase', phase=3) }}</p></article>

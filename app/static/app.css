@@ -14,3 +14,15 @@
 .flash-warning { border-left-color: orange; }
 .flash-error { border-left-color: var(--pico-del-color); }
 table code { font-size: 0.8em; white-space: pre-wrap; word-break: break-word; }
+.stats article { margin: 0; text-align: center; }
+.stats article h3 { margin-bottom: 0.25rem; }
+.stats article p { margin-bottom: 0.25rem; }
+.filters ul { flex-wrap: wrap; }
+.filters a[aria-current="page"] { font-weight: bold; text-decoration: underline; }
+.badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 0.5rem; font-size: 0.85em; background: var(--pico-secondary-background); color: var(--pico-secondary-inverse); }
+.badge-in_stock { background: #2e7d32; color: #fff; }
+.badge-on_loan { background: #1565c0; color: #fff; }
+.badge-damaged { background: #ef6c00; color: #fff; }
+.badge-lost { background: #c62828; color: #fff; }
+.badge-retired { background: #6d4c41; color: #fff; }
+.badge-written_off { background: #424242; color: #fff; }

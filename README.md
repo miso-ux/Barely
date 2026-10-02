@@ -30,7 +30,7 @@ Všetky účty majú heslo `Demo1234!`. Sú to len demo hodnoty zo seedu, nikdy 
 | `user` | Používateľ | |
 | `jana.novakova`, `peter.horvath` | Používateľ | Ďalší ukážkoví používatelia pre objednávky |
 
-Seed beží pri každom štarte, ale existujúce účty nemení. Zmenené heslá teda zostávajú. Úplný reset: `docker compose down -v`.
+Seed beží pri každom štarte, ale existujúce účty nemení. Zmenené heslá teda zostávajú. Seed tiež vytvorí 30 demo barelov (`B-0001` až `B-0030`) s rôznym počtom výpožičiek a stavmi, ak je evidencia prázdna. Úplný reset: `docker compose down -v`.
 
 ## Príkazy
 

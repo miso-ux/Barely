@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ barrel.code }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<hgroup>
+  <h1>{{ barrel.code }}</h1>
+  <p>
+    <span class="badge badge-{{ barrel.status.value }}">{{ t('barrel.status.' ~ barrel.status.value) }}</span>
+    · {{ t('barrels.loan_count') }}: {{ barrel.loan_count }} / {{ loan_limit }}
+    · {{ t('barrels.added_at') }}: {{ barrel.added_at | dt }}
+    {% if barrel.retired_at %} · {{ t('barrels.retired_at') }}: {{ barrel.retired_at | dt }}{% endif %}
+    {% if barrel.written_off_at %} · {{ t('barrels.written_off_at') }}: {{ barrel.written_off_at | dt }}{% endif %}
+  </p>
+</hgroup>
+
+{% if can_manage and targets %}
+<section>
+  <h2>{{ t('barrels.change_status') }}</h2>
+  <form method="post" action="/barrels/{{ barrel.id }}/status">
+    <div class="grid">
+      <label>{{ t('barrels.new_status') }}
+        <select name="to_status" required>
+          {% for s in targets %}
+            <option value="{{ s.value }}">{{ t('barrel.action.' ~ s.value) }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>{{ t('barrels.note') }}
+        <input type="text" name="note" placeholder="{{ t('barrels.note_help') }}">
+      </label>
+    </div>
+    <button type="submit" class="secondary">{{ t('common.save') }}</button>
+  </form>
+</section>
+{% elif can_manage %}
+  <p class="muted">{{ t('barrels.final_state') }}</p>
+{% endif %}
+
+<section>
+  <h2>{{ t('barrels.history') }}</h2>
+  <div class="overflow-auto">
+  <table>
+    <thead>
+      <tr>
+        <th>{{ t('audit.when') }}</th>
+        <th>{{ t('barrels.from') }}</th>
+        <th>{{ t('barrels.to') }}</th>
+        <th>{{ t('barrels.reason') }}</th>
+        <th>{{ t('barrels.note') }}</th>
+        <th>{{ t('audit.who') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in barrel.history | reverse %}
+      <tr>
+        <td>{{ h.created_at | dt }}</td>
+        <td>{% if h.from_status %}{{ t('barrel.status.' ~ h.from_status.value) }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td>{{ t('barrel.status.' ~ h.to_status.value) }}</td>
+        <td>{{ t('barrel.reason.' ~ h.reason) }}</td>
+        <td>{{ h.note or '' }}</td>
+        <td>{% if h.actor %}{{ h.actor.username }}{% else %}<span class="muted">{{ t('audit.system') }}</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<p><a href="/barrels">{{ t('common.back') }}</a></p>
+{% endblock %}

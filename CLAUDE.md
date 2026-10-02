@@ -6,9 +6,9 @@ Pokyny pre Clauda pri práci na projekte **Evidencia a výdaj barelov s vodou**.
 
 **Začíname stavať demo (fáza 1).** Rozsah dema je **tenký rez**, fázy 1 až 4: prihlásenie a roly, evidencia barelov, objednávka, výdaj s automatickým výberom barela, vrátenie, pokuta. Pumpy, faktúry, Supervízor a reporty (fázy 5 až 8) prídu až potom.
 
-**Stav (2. 10. 2026):** Krok 0 (stack, kap. 8) a Krok 1 (kostra projektu) sú hotové. **Fáza 1 je implementovaná** (používatelia, roly, oprávnenia, prihlásenie, konfigurácia, audit, seed). Ďalšia je fáza 2 (evidencia barelov). Pred ňou napíš krátky plán a počkaj na schválenie.
+**Stav (2. 10. 2026):** Krok 0 (stack, kap. 8) a Krok 1 (kostra projektu) sú hotové. **Fázy 1 a 2 sú implementované** (používatelia, roly, oprávnenia, prihlásenie, konfigurácia, audit, seed; evidencia barelov so stavovým automatom, históriou a dashboardom skladu). Ďalšia je fáza 3 (objednávky, rezervácie, výnimky, výdaj). Pred ňou potvrď Q-03, napíš krátky plán a počkaj na schválenie.
 
-Kľúčové miesta v kóde: oprávnenia a ich rozdelenie do rolí sú v `app/auth/permissions.py`, kontrola na endpointoch cez `require_permission(...)` v `app/auth/deps.py`, konfigurácia v `app/services/settings.py` (`DEFAULTS`), audit cez `app/services/audit.py`. Texty UI sú v `app/i18n/sk.json`. Testy bežia proti databáze `barely_test`, ktorá sa pred každým testom vyprázdni a znovu naplní seedom.
+Kľúčové miesta v kóde: oprávnenia a ich rozdelenie do rolí sú v `app/auth/permissions.py`, kontrola na endpointoch cez `require_permission(...)` v `app/auth/deps.py`, konfigurácia v `app/services/settings.py` (`DEFAULTS`), audit cez `app/services/audit.py`. Prechody stavov barela idú výhradne cez `app/services/barrel_state.py` (`transition`), ktorý zapisuje históriu aj audit a necommituje (commit robí volajúci, aby výdaj vo fáze 3 bežal v jednej transakcii). Databázové triggery zakazujú DELETE na `users`, `barrels`, `barrel_status_history` a UPDATE/DELETE na `audit_log`; pri novej doménovej tabuľke pridaj trigger `reject_delete` v migrácii. Texty UI sú v `app/i18n/sk.json`. Testy bežia proti databáze `barely_test`, ktorá sa pred každým testom vyprázdni a znovu naplní seedom; test v `tests/integration/test_supervisor.py` automaticky prechádza všetky zápisové endpointy z OpenAPI schémy.
 
 ### Krok 0: voľba technológií (blokuje všetko ostatné)
 
