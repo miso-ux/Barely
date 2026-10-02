@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ t('pumps.buy') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<article class="narrow">
+  <h1>{{ t('pumps.buy') }}</h1>
+  <p>{{ t('pumps.buy_help') }}</p>
+  {% if error %}<p class="error-text" role="alert">{{ error }}</p>{% endif %}
+  {% set form = form or {} %}
+  <form method="post" action="/pumps/order">
+    <label>{{ t('pumps.product') }}
+      <select name="product_id" required>
+        {% for row in rows %}
+          <option value="{{ row.product.id }}" {% if form.product_id == row.product.id %}selected{% endif %}>
+            {{ row.product.name }} · {{ row.product.price }} € · {{ t('pumps.free') }}: {{ row.free }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>{{ t('orders.quantity') }}
+      <input type="number" name="quantity" min="1" value="{{ form.quantity or 1 }}" required>
+    </label>
+    <label>{{ t('orders.requested_date') }}
+      <input type="date" name="requested_date" min="{{ min_date }}" max="{{ max_date }}" value="{{ form.requested_date or default_date }}" required>
+    </label>
+    <label>{{ t('orders.note') }}
+      <input type="text" name="note" value="{{ form.note or '' }}">
+    </label>
+    <button type="submit" {% if not rows %}disabled{% endif %}>{{ t('pumps.buy_button') }}</button>
+  </form>
+  <p><a href="/pumps">{{ t('common.back') }}</a></p>
+</article>
+{% endblock %}

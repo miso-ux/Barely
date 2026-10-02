@@ -45,7 +45,8 @@ def reset_database(database):
             text(
                 "TRUNCATE audit_log, settings, user_roles, role_permissions, "
                 "users, roles, permissions, barrel_status_history, barrels, "
-                "notifications, penalties, loans, exception_requests, orders "
+                "notifications, penalties, loans, exception_requests, "
+                "pump_stock_movements, orders, pump_products "
                 "RESTART IDENTITY CASCADE"
             )
         )

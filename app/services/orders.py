@@ -69,6 +69,18 @@ def validate_barrel_order(
     max_items = settings_service.get_int(db, "max_items_per_order")
     if quantity > max_items and not allow_over_limit:
         raise OverOrderLimit(max=max_items)
+    validate_common(db, user=user, quantity=quantity, requested_date=requested_date, today=today)
+    free = stock.free_count(db)
+    if quantity > free:
+        raise NotEnoughFree(free=free)
+
+
+def validate_common(
+    db: Session, *, user: User, quantity: int, requested_date: date, today: date | None = None
+) -> None:
+    """Rules shared by barrel and pump orders: quantity, pickup window (Q-03), debtor block."""
+    if quantity < 1:
+        raise InvalidQuantity()
     today = today or dates.today_local()
     horizon = settings_service.get_int(db, "order_horizon_days")
     if requested_date < today:
@@ -77,9 +89,11 @@ def validate_barrel_order(
         raise DateTooFar(days=horizon)
     if settings_service.get_bool(db, "block_debtors") and debtors.is_debtor(db, user):
         raise DebtorBlocked()
-    free = stock.free_count(db)
-    if quantity > free:
-        raise NotEnoughFree(free=free)
+
+
+def order_params(order: Order) -> dict[str, object]:
+    """Notification parameters shared by every order kind."""
+    return _order_params(order)
 
 
 def _order_params(order: Order) -> dict[str, object]:
@@ -335,11 +349,7 @@ def expire_reservations(db: Session, *, today: date | None = None) -> list[Order
     cancelled automatically and the pieces are released. Run by the daily job."""
     today = today or dates.today_local()
     validity = settings_service.get_int(db, "reservation_validity_days")
-    open_orders = db.scalars(
-        select(Order).where(
-            Order.kind == OrderKind.BARREL, Order.status.in_(stock.RESERVING_STATUSES)
-        )
-    ).all()
+    open_orders = db.scalars(select(Order).where(Order.status.in_(stock.RESERVING_STATUSES))).all()
     expired = [
         order
         for order in open_orders
@@ -357,8 +367,11 @@ def list_orders(
     status: OrderStatus | None = None,
     username: str | None = None,
     requested_date: date | None = None,
+    kind: OrderKind | None = None,
 ) -> list[Order]:
-    stmt = select(Order).where(Order.kind == OrderKind.BARREL)
+    stmt = select(Order)
+    if kind is not None:
+        stmt = stmt.where(Order.kind == kind)
     if user_id is not None:
         stmt = stmt.where(Order.user_id == user_id)
     if status is not None:
@@ -376,7 +389,7 @@ def list_orders(
 def open_orders_by_date(db: Session) -> list[tuple[date, int, int]]:
     """FR-SK-03: (pickup date, number of orders, pieces) for orders still to be issued."""
     rows: dict[date, list[int]] = {}
-    for order in list_orders(db):
+    for order in list_orders(db, kind=OrderKind.BARREL):
         if order.status in stock.RESERVING_STATUSES:
             bucket = rows.setdefault(order.requested_date, [0, 0])
             bucket[0] += 1

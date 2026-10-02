@@ -18,6 +18,11 @@
       <a href="/orders/new" role="button">{{ t('orders.new') }}</a>
     </article>
     <article>
+      <h3>{{ free_pumps }}</h3>
+      <p>{{ t('dashboard.free_pumps') }}</p>
+      <a href="/pumps/order" role="button" class="outline">{{ t('pumps.buy') }}</a>
+    </article>
+    <article>
       <h3>{{ open_orders | length }}</h3>
       <p><a href="/orders">{{ t('dashboard.open_orders') }}</a></p>
     </article>
@@ -70,6 +75,9 @@
   {% endif %}
   {% if current_user.has_any_permission('exceptions.create', 'exceptions.decide', 'orders.read_all') %}
     <article><h3><a href="/exceptions">{{ t('dashboard.exceptions') }}</a></h3><p>{{ t('dashboard.exceptions_help') }}</p></article>
+  {% endif %}
+  {% if current_user.has_permission('pumps.read') %}
+    <article><h3><a href="/pumps">{{ t('dashboard.pumps') }}</a></h3><p>{{ t('dashboard.pumps_help') }}</p></article>
   {% endif %}
   {% if current_user.has_permission('invoices.read') %}
     <article class="muted"><h3>{{ t('dashboard.invoices') }}</h3><p>{{ t('dashboard.coming_phase', phase=6) }}</p></article>

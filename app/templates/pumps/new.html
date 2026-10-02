@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ t('pumps.new') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<article class="narrow">
+  <h1>{{ t('pumps.new') }}</h1>
+  {% if error %}<p class="error-text" role="alert">{{ error }}</p>{% endif %}
+  {% set form = form or {} %}
+  <form method="post" action="/pumps/new">
+    <label>{{ t('pumps.name') }}
+      <input type="text" name="name" value="{{ form.name or '' }}" required>
+    </label>
+    <label>{{ t('pumps.price') }} (€)
+      <input type="text" name="price" value="{{ form.price or '' }}" inputmode="decimal" required>
+    </label>
+    <button type="submit">{{ t('pumps.create_button') }}</button>
+  </form>
+  <p><a href="/pumps">{{ t('common.back') }}</a></p>
+</article>
+{% endblock %}

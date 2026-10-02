@@ -29,6 +29,7 @@ from app.routers import (
     notifications,
     orders,
     penalties,
+    pumps,
     settings,
     users,
 )
@@ -82,6 +83,7 @@ app.include_router(orders.router)
 app.include_router(exceptions.router)
 app.include_router(notifications.router)
 app.include_router(penalties.router)
+app.include_router(pumps.router)
 
 
 @app.exception_handler(NotAuthenticated)

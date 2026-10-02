@@ -23,6 +23,11 @@
     <p><a href="/barrels?status={{ s.value }}">{{ t('barrel.status.' ~ s.value) }}</a></p>
   </article>
   {% endfor %}
+  <article>
+    <h3>{{ pump_stock }}</h3>
+    <p><a href="/pumps">{{ t('warehouse.pumps_in_stock') }}</a></p>
+    <small>{{ t('warehouse.pumps_free', free=pump_free) }}</small>
+  </article>
 </div>
 
 <section>

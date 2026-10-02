@@ -56,7 +56,8 @@ def _post_order(client: TestClient, quantity: int, date: str = TOMORROW, note: s
 
 def test_seed_orders_and_reservations(db: Session) -> None:
     statuses = sorted(o.status.value for o in db.scalars(select(Order)))
-    assert statuses == ["issued", "pending", "pending"]
+    # three barrel orders plus one pending pump order from the seed
+    assert statuses == ["issued", "pending", "pending", "pending"]
     assert stock.reserved_count(db) == 5
     # 26 in stock before seed orders, 2 issued -> 24 in stock, 5 reserved -> 19 free
     assert stock.in_stock_count(db) == 24

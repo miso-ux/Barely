@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ t('pumps.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('pumps.title') }}</h1>
+  <div class="actions">
+    {% if can_buy %}<a href="/pumps/order" role="button">{{ t('pumps.buy') }}</a>{% endif %}
+    {% if can_manage %}
+      <a href="/pumps/new" role="button" class="outline">{{ t('pumps.new') }}</a>
+      <a href="/pumps/report" role="button" class="outline">{{ t('pumps.report') }}</a>
+    {% endif %}
+  </div>
+</div>
+<p>{{ t('pumps.intro') }}</p>
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>{{ t('pumps.name') }}</th>
+      <th>{{ t('pumps.price') }}</th>
+      <th>{{ t('pumps.free') }}</th>
+      {% if can_manage %}<th>{{ t('pumps.stock') }}</th><th>{{ t('pumps.reserved') }}</th><th>{{ t('users.status') }}</th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    {% set p = row.product %}
+    <tr>
+      <td><a href="/pumps/{{ p.id }}">{{ p.name }}</a></td>
+      <td>{{ p.price }} €</td>
+      <td>{{ row.free }}</td>
+      {% if can_manage %}
+        <td>{{ p.stock }}</td>
+        <td>{{ row.reserved }}</td>
+        <td>{% if p.is_active %}{{ t('pumps.active') }}{% else %}<span class="muted">{{ t('pumps.inactive') }}</span>{% endif %}</td>
+      {% endif %}
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted">{{ t('pumps.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

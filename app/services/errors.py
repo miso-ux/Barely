@@ -137,3 +137,23 @@ class InvalidReturnCondition(DomainError):
 
 class InvalidPenaltyTransition(DomainError):
     message_key = "error.invalid_penalty_transition"
+
+
+class InvalidPrice(DomainError):
+    message_key = "error.invalid_price"
+
+
+class InvalidProductName(DomainError):
+    message_key = "error.invalid_product_name"
+
+
+class ProductNameTaken(DomainError):
+    message_key = "error.product_name_taken"
+
+
+class ProductInactive(DomainError):
+    message_key = "error.product_inactive"
+
+
+class AlreadyPaid(DomainError):
+    message_key = "error.already_paid"

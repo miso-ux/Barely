@@ -15,6 +15,7 @@ from app.services import barrels as barrels_service
 from app.services import debtors as debtors_service
 from app.services import exceptions as exceptions_service
 from app.services import orders as orders_service
+from app.services import pumps as pumps_service
 from app.services import settings as settings_service
 from app.services.errors import DomainError
 from app.web import flash, render
@@ -53,6 +54,8 @@ def warehouse_dashboard(
             "pending_exceptions": exceptions_service.pending_count(db),
             "debtors": len(debtors_service.list_debtors(db)),
             "can_run_daily": actor.has_permission(Perm.ORDERS_MANAGE),
+            "pump_stock": pumps_service.total_stock(db),
+            "pump_free": pumps_service.total_free(db),
         },
     )
 

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<hgroup>
+  <h1>{{ product.name }}</h1>
+  <p>{{ t('pumps.price') }}: {{ product.price }} € · {{ t('pumps.stock') }}: {{ product.stock }} · {{ t('pumps.reserved') }}: {{ reserved }} · {{ t('pumps.free') }}: {{ free }}
+     {% if not product.is_active %} · <span class="muted">{{ t('pumps.inactive') }}</span>{% endif %}</p>
+</hgroup>
+
+{% if can_manage %}
+<section class="grid">
+  <article>
+    <h3>{{ t('pumps.receive') }}</h3>
+    <form method="post" action="/pumps/{{ product.id }}/receive">
+      <label>{{ t('orders.quantity') }}<input type="number" name="quantity" min="1" value="10" required></label>
+      <label>{{ t('barrels.note') }}<input type="text" name="note"></label>
+      <button type="submit">{{ t('pumps.receive_button') }}</button>
+    </form>
+  </article>
+  <article>
+    <h3>{{ t('pumps.edit') }}</h3>
+    <form method="post" action="/pumps/{{ product.id }}">
+      <label>{{ t('pumps.name') }}<input type="text" name="name" value="{{ product.name }}" required></label>
+      <label>{{ t('pumps.price') }} (€)<input type="text" name="price" value="{{ product.price }}" inputmode="decimal" required></label>
+      <label><input type="checkbox" name="is_active" value="1" {% if product.is_active %}checked{% endif %}> {{ t('pumps.active') }}</label>
+      <button type="submit" class="outline">{{ t('common.save') }}</button>
+    </form>
+    <p><small>{{ t('pumps.price_help') }}</small></p>
+  </article>
+</section>
+{% endif %}
+
+<section>
+  <h2>{{ t('pumps.movements') }}</h2>
+  <div class="overflow-auto">
+  <table>
+    <thead><tr><th>{{ t('audit.when') }}</th><th>{{ t('pumps.delta') }}</th><th>{{ t('barrels.reason') }}</th><th>{{ t('orders.order') }}</th><th>{{ t('barrels.note') }}</th><th>{{ t('audit.who') }}</th></tr></thead>
+    <tbody>
+      {% for m in product.movements %}
+      <tr>
+        <td>{{ m.created_at | dt }}</td>
+        <td>{{ '+' if m.delta > 0 else '' }}{{ m.delta }}</td>
+        <td>{{ t('pump.movement.' ~ m.reason) }}</td>
+        <td>{% if m.order_id %}<a href="/orders/{{ m.order_id }}">#{{ m.order_id }}</a>{% endif %}</td>
+        <td>{{ m.note or '' }}</td>
+        <td>{% if m.actor %}{{ m.actor.username }}{% else %}<span class="muted">{{ t('audit.system') }}</span>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="muted">{{ t('pumps.no_movements') }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+<p><a href="/pumps">{{ t('common.back') }}</a></p>
+{% endblock %}

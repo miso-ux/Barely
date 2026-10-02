@@ -7,8 +7,31 @@
     <span class="badge badge-order-{{ order.status.value }}">{{ t('order.status.' ~ order.status.value) }}</span>
   </h1>
   <p>{{ order.user.display_name }} <small class="muted">{{ order.user.username }}</small> ·
+     {{ t('order.kind.' ~ order.kind.value) }}{% if order.product %} „{{ order.product.name }}“{% endif %} ·
      {{ order.quantity }} {{ t('orders.pieces_short') }} · {{ t('orders.requested_date') }}: {{ order.requested_date | d }}</p>
 </hgroup>
+
+{% if order.is_pump %}
+<section>
+  <table>
+    <tbody>
+      <tr><th>{{ t('pumps.unit_price') }}</th><td>{% if order.unit_price is not none %}{{ order.unit_price }} €{% else %}<span class="muted">{{ t('pumps.price_at_issue', price=order.product.price) }}</span>{% endif %}</td></tr>
+      <tr><th>{{ t('pumps.total') }}</th><td>{% if order.total_price is not none %}{{ order.total_price }} €{% else %}—{% endif %}</td></tr>
+      <tr><th>{{ t('pumps.payment') }}</th><td>
+        {% if order.paid_at %}{{ t('pumps.paid_on', when=order.paid_at | dt) }}{% if order.payment_note %} · {{ order.payment_note }}{% endif %}
+        {% elif order.status.value == 'issued' %}<span class="badge badge-pen-unpaid">{{ t('pumps.unpaid') }}</span>
+        {% else %}—{% endif %}
+      </td></tr>
+    </tbody>
+  </table>
+  {% if can_pay %}
+  <form method="post" action="/orders/{{ order.id }}/pay" class="grid">
+    <input type="text" name="note" placeholder="{{ t('penalties.payment_note') }}">
+    <button type="submit">{{ t('pumps.pay_button') }}</button>
+  </form>
+  {% endif %}
+</section>
+{% endif %}
 
 {% if order.note %}<p><em>{{ order.note }}</em></p>{% endif %}
 {% if order.exception_request %}

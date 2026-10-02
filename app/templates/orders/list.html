@@ -19,6 +19,12 @@
       <option value="{{ s.value }}" {% if selected == s %}selected{% endif %}>{{ t('order.status.' ~ s.value) }}</option>
     {% endfor %}
   </select>
+  <select name="kind">
+    <option value="">{{ t('orders.kind_all') }}</option>
+    {% for k in kinds %}
+      <option value="{{ k.value }}" {% if filter_kind == k.value %}selected{% endif %}>{{ t('order.kind.' ~ k.value) }}</option>
+    {% endfor %}
+  </select>
   {% if see_all %}
     <input type="text" name="user" placeholder="{{ t('orders.user') }}" value="{{ filter_user }}">
   {% endif %}
@@ -32,6 +38,7 @@
     <tr>
       <th>#</th>
       {% if see_all %}<th>{{ t('orders.user') }}</th>{% endif %}
+      <th>{{ t('orders.kind') }}</th>
       <th>{{ t('orders.quantity') }}</th>
       <th>{{ t('orders.requested_date') }}</th>
       <th>{{ t('orders.status') }}</th>
@@ -43,6 +50,7 @@
     <tr>
       <td><a href="/orders/{{ o.id }}">#{{ o.id }}</a></td>
       {% if see_all %}<td>{{ o.user.display_name }} <small class="muted">{{ o.user.username }}</small></td>{% endif %}
+      <td>{{ t('order.kind.' ~ o.kind.value) }}{% if o.product %} <small class="muted">{{ o.product.name }}</small>{% endif %}</td>
       <td>{{ o.quantity }}</td>
       <td>{{ o.requested_date | d }}</td>
       <td><span class="badge badge-order-{{ o.status.value }}">{{ t('order.status.' ~ o.status.value) }}</span></td>

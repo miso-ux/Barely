@@ -5,6 +5,7 @@ accounts that do not exist yet. Existing accounts (and their changed passwords) 
 """
 
 from datetime import timedelta
+from decimal import Decimal
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
@@ -18,6 +19,7 @@ from app.models import (
     CustomerType,
     Order,
     Permission,
+    PumpProduct,
     Role,
     RolePermission,
     User,
@@ -27,6 +29,7 @@ from app.services import audit, barrel_state, dates
 from app.services import barrels as barrels_service
 from app.services import exceptions as exceptions_service
 from app.services import orders as orders_service
+from app.services import pumps as pumps_service
 from app.services import settings as settings_service
 from app.services.barrel_state import Reason
 
@@ -202,6 +205,28 @@ def seed_demo_orders(db: Session) -> int:
     return 3
 
 
+def seed_demo_pumps(db: Session) -> int:
+    """One pump type with stock and one pending pump order (Q-06)."""
+    if db.scalar(select(func.count()).select_from(PumpProduct)):
+        return 0
+    by_name = {u.username: u for u in db.scalars(select(User))}
+    warehouse = by_name["warehouse"]
+    product = pumps_service.create_product(
+        db, actor=warehouse, name="Ručná pumpa na barel", price=Decimal("12.50")
+    )
+    pumps_service.receive_stock(
+        db, actor=warehouse, product=product, quantity=15, note="Počiatočná zásoba"
+    )
+    pumps_service.place_order(
+        db,
+        user=by_name["peter.horvath"],
+        product=product,
+        quantity=1,
+        requested_date=dates.today_local() + timedelta(days=1),
+    )
+    return 1
+
+
 def run(quiet: bool = False) -> None:
     with SessionLocal() as db:
         permissions = sync_permissions(db)
@@ -213,10 +238,12 @@ def run(quiet: bool = False) -> None:
         db.commit()
         barrels_created = seed_demo_barrels(db)
         orders_created = seed_demo_orders(db)
+        pumps_created = seed_demo_pumps(db)
     if not quiet:
         print(
             f"seed: roles and permissions synced, {created} demo user(s) created, "
-            f"{barrels_created} demo barrel(s) created, {orders_created} demo order(s) created"
+            f"{barrels_created} demo barrel(s) created, {orders_created} demo order(s) created, "
+            f"{pumps_created} pump product(s) created"
         )
 
 

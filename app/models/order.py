@@ -20,6 +20,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 from app.models.barrel import Barrel
+from app.models.pump import PumpProduct
 from app.models.user import User
 
 
@@ -78,7 +79,16 @@ class Order(Base):
     cancelled_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     cancel_reason: Mapped[str | None] = mapped_column(String(50))
 
+    # Pump orders only (FR-PU): product, unit price frozen at issue, on-site payment.
+    product_id: Mapped[int | None] = mapped_column(ForeignKey("pump_products.id"))
+    unit_price: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    paid_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    payment_note: Mapped[str | None] = mapped_column(Text)
+
     user: Mapped[User] = relationship(foreign_keys=[user_id], lazy="joined")
+    product: Mapped["PumpProduct | None"] = relationship(lazy="joined")
+    payer: Mapped[User | None] = relationship(foreign_keys=[paid_by])
     creator: Mapped[User | None] = relationship(foreign_keys=[created_by])
     ready_actor: Mapped[User | None] = relationship(foreign_keys=[ready_by])
     issue_actor: Mapped[User | None] = relationship(foreign_keys=[issued_by])
@@ -89,6 +99,16 @@ class Order(Base):
     exception_request: Mapped["ExceptionRequest | None"] = relationship(
         back_populates="order", uselist=False
     )
+
+    @property
+    def is_pump(self) -> bool:
+        return self.kind is OrderKind.PUMP
+
+    @property
+    def total_price(self) -> Decimal | None:
+        if self.unit_price is None:
+            return None
+        return (self.unit_price * self.quantity).quantize(Decimal("0.01"))
 
 
 class ExceptionRequest(Base):

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ t('pumps.report') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<h1>{{ t('pumps.report') }}</h1>
+<form method="get" action="/pumps/report" class="grid filters-form">
+  <label>{{ t('report.from') }}<input type="date" name="from" value="{{ report.date_from.isoformat() }}"></label>
+  <label>{{ t('report.to') }}<input type="date" name="to" value="{{ report.date_to.isoformat() }}"></label>
+  <button type="submit" class="outline">{{ t('common.filter') }}</button>
+</form>
+<div class="grid stats">
+  <article><h3>{{ report.orders | length }}</h3><p>{{ t('orders.count') }}</p></article>
+  <article><h3>{{ report.pieces }}</h3><p>{{ t('orders.pieces') }}</p></article>
+  <article><h3>{{ report.revenue }} €</h3><p>{{ t('report.revenue') }}</p></article>
+</div>
+<div class="overflow-auto">
+<table>
+  <thead><tr><th>#</th><th>{{ t('orders.user') }}</th><th>{{ t('pumps.product') }}</th><th>{{ t('orders.quantity') }}</th><th>{{ t('pumps.unit_price') }}</th><th>{{ t('pumps.total') }}</th><th>{{ t('orders.step.issued') }}</th><th>{{ t('pumps.payment') }}</th></tr></thead>
+  <tbody>
+    {% for o in report.orders %}
+    <tr>
+      <td><a href="/orders/{{ o.id }}">#{{ o.id }}</a></td>
+      <td>{{ o.user.username }}</td>
+      <td>{{ o.product.name }}</td>
+      <td>{{ o.quantity }}</td>
+      <td>{{ o.unit_price }} €</td>
+      <td>{{ o.total_price }} €</td>
+      <td>{{ o.issued_at | dt }}</td>
+      <td>{% if o.paid_at %}{{ t('pumps.paid_on', when=o.paid_at | dt) }}{% else %}<span class="muted">{{ t('pumps.unpaid') }}</span>{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="muted">{{ t('orders.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<p><a href="/pumps">{{ t('common.back') }}</a></p>
+{% endblock %}

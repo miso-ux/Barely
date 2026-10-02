@@ -14,6 +14,7 @@ from app.models.order import (
     OrderStatus,
 )
 from app.models.penalty import Penalty, PenaltyReason, PenaltyStatus
+from app.models.pump import MovementReason, PumpProduct, PumpStockMovement
 from app.models.rbac import Permission, Role, RolePermission, UserRole
 from app.models.setting import Setting
 from app.models.user import CustomerType, User
@@ -29,6 +30,9 @@ __all__ = [
     "ExceptionRequestStatus",
     "Loan",
     "LoanStatus",
+    "MovementReason",
+    "PumpProduct",
+    "PumpStockMovement",
     "Notification",
     "Order",
     "OrderKind",

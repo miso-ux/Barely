@@ -8,6 +8,7 @@ from app.models import LoanStatus, OrderStatus, User
 from app.services import debtors as debtors_service
 from app.services import orders as orders_service
 from app.services import penalties as penalties_service
+from app.services import pumps as pumps_service
 from app.services import stock
 from app.web import render
 
@@ -19,6 +20,7 @@ def dashboard(request: Request, user: User = Depends(require_user), db: Session 
     context: dict = {}
     if user.has_permission(Perm.STOCK_READ_FREE):
         context["free"] = stock.free_count(db)
+        context["free_pumps"] = pumps_service.total_free(db)
     if user.has_permission(Perm.ORDERS_READ_OWN):
         own = orders_service.list_orders(db, user_id=user.id)
         context["open_orders"] = [

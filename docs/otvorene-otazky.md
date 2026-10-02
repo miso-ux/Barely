@@ -1,6 +1,6 @@
 # Otvorené otázky
 
-Projekt: Evidencia a výdaj barelov s vodou. Stav k 2. 10. 2026. Q-01 až Q-05, Q-07 a Q-08 sú vyriešené (ID sa nepoužíva znova).
+Projekt: Evidencia a výdaj barelov s vodou. Stav k 2. 10. 2026. Q-01 až Q-08 sú vyriešené (ID sa nepoužíva znova).
 Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.md`.
 
 ## Ako s týmto súborom pracovať
@@ -13,23 +13,10 @@ Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.
 
 | ID | Téma | Treba vyriešiť pred | Blokuje? |
 |---|---|---|---|
-| Q-06 | Pumpy: typy, cena, limity | Fáza 5 | Čiastočne |
 | Q-09 | Odovzdanie faktúry a jej náležitosti | Fáza 6 | Nie pre demo |
 | Q-10 | Uchovávanie záznamov a GDPR | Pred ostrým nasadením | Nie pre demo |
 | Q-11 | Externí zákazníci | Pred ich spustením | Nie pre demo |
 | Q-12 | Informovanie zamestnancov o Supervízorovi | Pred fázou 8 | Nie pre demo |
-
----
-
-## Q-06 Pumpy: typy, cena, limity
-
-**Otázka:** Koľko typov púmp bude, aká je cena a je limit kusov na jednu objednávku?
-
-**Prečo na tom záleží:** Určuje tvar katalógu a objednávky pumpy.
-
-**Návrh:** Jeden typ pumpy, cena uložená pri produkte, bez limitu okrem aktuálnej zásoby. Dátový model necháme tak, aby šlo neskôr pridať viac typov.
-
-**Rozhodnutie:** zatiaľ nie
 
 ---
 
@@ -99,6 +86,7 @@ Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.
 | Platnosť rezervácie a horizont objednávky (býv. Q-03, 2. 10. 2026) | Rezervácia platí 3 pracovné dni od požadovaného dátumu (`reservation_validity_days`), potom ju denná úloha automaticky stornuje, kusy uvoľní a upozorní používateľa aj skladníka. Objednať možno najviac 30 dní dopredu (`order_horizon_days`) a nie do minulosti. Sviatky sa zatiaľ nezohľadňujú |
 | Poškodený barel (býv. Q-04, 2. 10. 2026) | V MVP vždy odpis. Poškodený barel ide `damaged → written_off` ručne s dôvodom, oprava (`damaged → in_stock`) nie je povolená a môže prísť neskôr ako nový prechod |
 | Vrátenie po lehote (býv. Q-05, 2. 10. 2026) | Pokuta za nevrátenie ostáva aj po neskorom vrátení, skladník ju môže stornovať s povinným dôvodom. Nájdený stratený barel ide `lost → in_stock`. Vrátenie peňazí za už zaplatenú pokutu sa rieši mimo systému. Dlžníkom sa človek stáva, keď denná úloha označí výpožičku po lehote alebo kým má nezaplatenú pokutu |
+| Pumpy (býv. Q-06, 2. 10. 2026) | V deme jeden typ pumpy, cena pri produkte, bez limitu kusov okrem voľnej zásoby (zásoba mínus rezervácie). Model `pump_products` dovolí viac typov, typ sa dá stiahnuť z ponuky (nemaže sa). Cena sa uloží k objednávke pri vydaní |
 | Kto mení konfiguráciu (býv. Q-07, 2. 10. 2026) | Super admin cez oprávnenie `settings.manage`, Supervízor len číta (`settings.read`), každá zmena ide do audit logu. Oprávnenie možno neskôr dať inej role bez zásahu do kódu |
 | Pomenovanie rolí (býv. Q-08, 2. 10. 2026) | V UI „Skladník" a „Supervízor". Kódy zostávajú `warehouse` a `supervisor`, názvy sú v prekladovom slovníku |
 | Technológie a prostredie (býv. Q-01, 2. 10. 2026) | Možnosť A: Python 3.12 + FastAPI, Jinja2 + HTMX, PostgreSQL 16, SQLAlchemy + Alembic, pytest, uv, Ruff. Všetko v Docker Compose (`app`, `db`), demo v Docker Desktop, neskôr Linux server. Prihlásenie meno + heslo so session, pripravené na Entra ID/Google cez Authlib (OIDC). Zamietnuté: TypeScript/Next.js, .NET/Blazor. Detail v `CLAUDE.md` kap. 8 |

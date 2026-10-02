@@ -9,10 +9,11 @@ from app.auth.deps import require_any_permission, require_permission
 from app.auth.permissions import Perm
 from app.db import get_db
 from app.i18n import t
-from app.models import Order, OrderStatus, User
+from app.models import Order, OrderKind, OrderStatus, User
 from app.services import dates, notifications, stock
 from app.services import orders as orders_service
 from app.services import penalties as penalties_service
+from app.services import pumps as pumps_service
 from app.services import returns as returns_service
 from app.services import settings as settings_service
 from app.services.errors import DomainError
@@ -48,12 +49,15 @@ def list_orders(
     params = request.query_params
     selected = _parse_status(params.get("status"))
     requested_date = date.fromisoformat(params["date"]) if params.get("date") else None
+    kind_raw = params.get("kind")
+    kind = OrderKind(kind_raw) if kind_raw in OrderKind.__members__.values() else None
     rows = orders_service.list_orders(
         db,
         user_id=None if see_all else actor.id,
         status=selected,
         username=params.get("user") if see_all else None,
         requested_date=requested_date,
+        kind=kind,
     )
     return render(
         request,
@@ -65,6 +69,8 @@ def list_orders(
             "selected": selected,
             "filter_user": params.get("user", ""),
             "filter_date": params.get("date", ""),
+            "filter_kind": kind_raw or "",
+            "kinds": list(OrderKind),
             "can_create": actor.has_permission(Perm.ORDERS_CREATE),
             "free": stock.free_count(db),
         },
@@ -146,7 +152,11 @@ def order_detail(
             "can_prepare": can_manage and order.status is OrderStatus.PENDING,
             "can_issue": can_manage and order.status is OrderStatus.READY,
             "outstanding": returns_service.outstanding_loans(order),
-            "can_return": can_manage and order.status is OrderStatus.ISSUED,
+            "can_return": can_manage and order.status is OrderStatus.ISSUED and not order.is_pump,
+            "can_pay": order.is_pump
+            and order.status is OrderStatus.ISSUED
+            and order.paid_at is None
+            and actor.has_permission(Perm.PAYMENTS_RECORD_ONSITE),
             "penalties": [
                 p
                 for p in penalties_service.list_penalties(db, user_id=order.user_id)
@@ -230,10 +240,33 @@ def issue_order(
 ):
     order = _get_order_or_404(db, order_id)
     try:
-        loans = orders_service.issue_order(db, actor=actor, order=order)
+        if order.is_pump:
+            pumps_service.issue_order(db, actor=actor, order=order)
+            flash(request, t("orders.issued_pump", total=f"{order.total_price:.2f}"), "success")
+        else:
+            loans = orders_service.issue_order(db, actor=actor, order=order)
+            codes = ", ".join(loan.barrel.code for loan in loans)
+            flash(request, t("orders.issued", codes=codes), "success")
+    except DomainError as exc:
+        flash(request, t(exc.message_key, **exc.params), "error")
+    return RedirectResponse(f"/orders/{order.id}", status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/{order_id}/pay")
+def pay_order(
+    request: Request,
+    order_id: int,
+    note: Annotated[str, Form()] = "",
+    actor: User = Depends(require_permission(Perm.PAYMENTS_RECORD_ONSITE)),
+    db: Session = Depends(get_db),
+):
+    order = _get_order_or_404(db, order_id)
+    if not order.is_pump:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    try:
+        pumps_service.record_payment(db, actor=actor, order=order, note=note)
     except DomainError as exc:
         flash(request, t(exc.message_key, **exc.params), "error")
     else:
-        codes = ", ".join(loan.barrel.code for loan in loans)
-        flash(request, t("orders.issued", codes=codes), "success")
+        flash(request, t("orders.paid"), "success")
     return RedirectResponse(f"/orders/{order.id}", status.HTTP_303_SEE_OTHER)
