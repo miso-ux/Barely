@@ -15,11 +15,24 @@
         <li><strong><a href="/">{{ t('app.title') }}</a></strong></li>
       </ul>
       <ul>
-        {% block nav %}{% endblock %}
+        {% if current_user %}
+          <li class="muted">{{ current_user.display_name }}</li>
+          <li><a href="/password">{{ t('nav.password') }}</a></li>
+          <li>
+            <form method="post" action="/logout" class="inline">
+              <button type="submit" class="outline secondary">{{ t('nav.logout') }}</button>
+            </form>
+          </li>
+        {% else %}
+          <li><a href="/login">{{ t('nav.login') }}</a></li>
+        {% endif %}
       </ul>
     </nav>
   </header>
   <main class="container">
+    {% for f in flashes %}
+      <article class="flash flash-{{ f.category }}" role="status">{{ f.text }}</article>
+    {% endfor %}
     {% block content %}{% endblock %}
   </main>
 </body>

@@ -1,5 +1,16 @@
 /* Project-specific overrides on top of Pico CSS. */
-mark.error {
-  background: var(--pico-del-color);
-  color: #fff;
-}
+.narrow { max-width: 32rem; margin-inline: auto; }
+.muted { color: var(--pico-muted-color); }
+.inline { display: inline; margin: 0; }
+.inline button { margin: 0; width: auto; }
+.actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.page-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.page-header h1 { margin: 0; }
+.cards article { margin: 0; }
+.cards article.muted h3 { color: var(--pico-muted-color); }
+.error-text { color: var(--pico-del-color); }
+.flash { padding: 0.75rem 1rem; margin-bottom: 1rem; border-left: 4px solid var(--pico-primary); }
+.flash-success { border-left-color: var(--pico-ins-color); }
+.flash-warning { border-left-color: orange; }
+.flash-error { border-left-color: var(--pico-del-color); }
+table code { font-size: 0.8em; white-space: pre-wrap; word-break: break-word; }

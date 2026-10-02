@@ -19,7 +19,18 @@ Prehliadač databázy (voliteľne): `docker compose --profile tools up adminer`,
 
 ## Demo účty
 
-Doplnia sa vo fáze 1 (jeden účet na každú rolu). Heslá sú len demo, Super admin si ich pri prvom prihlásení musí zmeniť.
+Všetky účty majú heslo `Demo1234!`. Sú to len demo hodnoty zo seedu, nikdy ich nepoužívajte v ostrej prevádzke.
+
+| Prihlasovacie meno | Rola | Poznámka |
+|---|---|---|
+| `admin` | Super admin | Pri prvom prihlásení si musí zmeniť heslo |
+| `warehouse` | Skladník | |
+| `invoicing` | Fakturant | |
+| `supervisor` | Supervízor | Len na čítanie |
+| `user` | Používateľ | |
+| `jana.novakova`, `peter.horvath` | Používateľ | Ďalší ukážkoví používatelia pre objednávky |
+
+Seed beží pri každom štarte, ale existujúce účty nemení. Zmenené heslá teda zostávajú. Úplný reset: `docker compose down -v`.
 
 ## Príkazy
 

@@ -42,7 +42,11 @@ known-first-party = ["app", "tests"]
 
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI dependency injection relies on Depends() in argument defaults.
-extend-immutable-calls = ["fastapi.Depends"]
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "app.auth.deps.require_permission",
+    "app.auth.deps.require_any_permission",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

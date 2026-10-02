@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ t('users.new') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<article class="narrow">
+  <h1>{{ t('users.new') }}</h1>
+  {% if error %}<p class="error-text" role="alert">{{ error }}</p>{% endif %}
+  {% set form = form or {} %}
+  <form method="post" action="/users/new">
+    <label>{{ t('users.username') }}
+      <input type="text" name="username" value="{{ form.username or '' }}" required>
+      <small>{{ t('auth.username_help') }}</small>
+    </label>
+    <label>{{ t('users.display_name') }}
+      <input type="text" name="display_name" value="{{ form.display_name or '' }}" required>
+    </label>
+    <label>{{ t('users.initial_password') }}
+      <input type="text" name="password" required minlength="8" autocomplete="off">
+      <small>{{ t('users.initial_password_help') }}</small>
+    </label>
+    <label>{{ t('users.customer_type') }}
+      <select name="customer_type">
+        {% for ct in customer_types %}
+          <option value="{{ ct.value }}" {% if form.customer_type == ct.value %}selected{% endif %}>{{ t('customer_type.' ~ ct.value) }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <fieldset>
+      <legend>{{ t('users.roles') }}</legend>
+      {% for role in roles %}
+        <label>
+          <input type="checkbox" name="roles" value="{{ role.code }}" {% if role.code in (form.roles or []) %}checked{% endif %}>
+          {{ t(role.name_key) }}
+        </label>
+      {% endfor %}
+    </fieldset>
+    <button type="submit">{{ t('users.create_button') }}</button>
+  </form>
+  <p><a href="/users">{{ t('common.back') }}</a></p>
+</article>
+{% endblock %}

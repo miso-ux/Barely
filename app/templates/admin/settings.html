@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ t('settings.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<h1>{{ t('settings.title') }}</h1>
+<p>{{ t('settings.intro') }}</p>
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>{{ t('settings.name') }}</th>
+      <th>{{ t('settings.value') }}</th>
+      {% if can_manage %}<th></th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    {% set kind = kinds[row.key] %}
+    <tr>
+      <td>
+        <strong>{{ t('setting.' ~ row.key ~ '.label') }}</strong><br>
+        <small>{{ t('setting.' ~ row.key ~ '.help') }}</small>
+      </td>
+      {% if can_manage %}
+        <form method="post" action="/admin/settings/{{ row.key }}" id="f-{{ row.key }}"></form>
+        <td>
+          {% if kind == 'bool' %}
+            <select name="value" form="f-{{ row.key }}">
+              <option value="true" {% if row.value %}selected{% endif %}>{{ t('common.yes') }}</option>
+              <option value="false" {% if not row.value %}selected{% endif %}>{{ t('common.no') }}</option>
+            </select>
+          {% elif kind == 'list' %}
+            <input type="text" name="value" form="f-{{ row.key }}" value='{{ row.value | tojson }}'>
+          {% else %}
+            <input type="text" name="value" form="f-{{ row.key }}" value="{{ row.value }}" {% if kind == 'int' %}inputmode="numeric"{% endif %}>
+          {% endif %}
+        </td>
+        <td><button type="submit" form="f-{{ row.key }}" class="outline">{{ t('common.save') }}</button></td>
+      {% else %}
+        <td>
+          {% if kind == 'bool' %}{{ t('common.yes') if row.value else t('common.no') }}
+          {% elif kind == 'list' %}<code>{{ row.value | tojson }}</code>
+          {% else %}{{ row.value }}{% endif %}
+        </td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

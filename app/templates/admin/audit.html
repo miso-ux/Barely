@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ t('audit.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<h1>{{ t('audit.title') }}</h1>
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>{{ t('audit.when') }}</th>
+      <th>{{ t('audit.who') }}</th>
+      <th>{{ t('audit.action') }}</th>
+      <th>{{ t('audit.entity') }}</th>
+      <th>{{ t('audit.before') }}</th>
+      <th>{{ t('audit.after') }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for e in entries %}
+    <tr>
+      <td>{{ e.created_at | dt }}</td>
+      <td>{% if e.actor %}{{ e.actor.username }}{% else %}<span class="muted">{{ t('audit.system') }}</span>{% endif %}</td>
+      <td>{{ t('audit.action.' ~ e.action) }}</td>
+      <td>{{ e.entity_type }}{% if e.entity_id %} #{{ e.entity_id }}{% endif %}</td>
+      <td>{% if e.before %}<code>{{ e.before | tojson }}</code>{% endif %}</td>
+      <td>{% if e.after %}<code>{{ e.after | tojson }}</code>{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">{{ t('audit.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ t('auth.login_title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<article class="narrow">
+  <hgroup>
+    <h1>{{ t('auth.login_title') }}</h1>
+    <p>{{ t('app.tagline') }}</p>
+  </hgroup>
+  {% if error %}<p class="error-text" role="alert">{{ error }}</p>{% endif %}
+  <form method="post" action="/login">
+    <input type="hidden" name="next" value="{{ next or '/' }}">
+    <label>{{ t('auth.username') }}
+      <input type="text" name="username" value="{{ username or '' }}" autocomplete="username" required autofocus>
+    </label>
+    <label>{{ t('auth.password') }}
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit">{{ t('auth.login_button') }}</button>
+  </form>
+</article>
+{% endblock %}

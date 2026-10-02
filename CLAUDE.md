@@ -6,7 +6,9 @@ Pokyny pre Clauda pri práci na projekte **Evidencia a výdaj barelov s vodou**.
 
 **Začíname stavať demo (fáza 1).** Rozsah dema je **tenký rez**, fázy 1 až 4: prihlásenie a roly, evidencia barelov, objednávka, výdaj s automatickým výberom barela, vrátenie, pokuta. Pumpy, faktúry, Supervízor a reporty (fázy 5 až 8) prídu až potom.
 
-**Krok 0 je hotový** (2. 10. 2026): stack je zapísaný v kap. 8. Pokračuje sa Krokom 1.
+**Stav (2. 10. 2026):** Krok 0 (stack, kap. 8) a Krok 1 (kostra projektu) sú hotové. **Fáza 1 je implementovaná** (používatelia, roly, oprávnenia, prihlásenie, konfigurácia, audit, seed). Ďalšia je fáza 2 (evidencia barelov). Pred ňou napíš krátky plán a počkaj na schválenie.
+
+Kľúčové miesta v kóde: oprávnenia a ich rozdelenie do rolí sú v `app/auth/permissions.py`, kontrola na endpointoch cez `require_permission(...)` v `app/auth/deps.py`, konfigurácia v `app/services/settings.py` (`DEFAULTS`), audit cez `app/services/audit.py`. Texty UI sú v `app/i18n/sk.json`. Testy bežia proti databáze `barely_test`, ktorá sa pred každým testom vyprázdni a znovu naplní seedom.
 
 ### Krok 0: voľba technológií (blokuje všetko ostatné)
 

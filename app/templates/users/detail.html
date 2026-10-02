@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<hgroup>
+  <h1>{{ user.display_name }}</h1>
+  <p>{{ user.username }} · {{ t('customer_type.' ~ user.customer_type.value) }} ·
+    {% if user.is_active %}{{ t('users.active') }}{% else %}{{ t('users.inactive') }}{% endif %}
+    {% if user.must_change_password %} · {{ t('users.must_change_password') }}{% endif %}
+  </p>
+</hgroup>
+
+<p>{{ t('users.created_at') }}: {{ user.created_at | dt }}</p>
+
+<section>
+  <h2>{{ t('users.roles') }}</h2>
+  {% if can_manage and not is_self %}
+    <form method="post" action="/users/{{ user.id }}/roles">
+      {% for role in roles %}
+        <label>
+          <input type="checkbox" name="roles" value="{{ role.code }}" {% if role.code in user.role_codes %}checked{% endif %}>
+          {{ t(role.name_key) }}
+        </label>
+      {% endfor %}
+      <button type="submit">{{ t('users.save_roles') }}</button>
+    </form>
+  {% else %}
+    <p>{% for role in user.roles %}{{ t(role.name_key) }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+    {% if is_self %}<p><small>{{ t('users.self_role_note') }}</small></p>{% endif %}
+  {% endif %}
+</section>
+
+{% if can_manage and not is_self %}
+<section>
+  <h2>{{ t('users.account') }}</h2>
+  <div class="actions">
+    <form method="post" action="/users/{{ user.id }}/active" class="inline">
+      <input type="hidden" name="active" value="{{ '0' if user.is_active else '1' }}">
+      <button type="submit" class="{{ 'secondary' if user.is_active else '' }}">
+        {{ t('users.deactivate') if user.is_active else t('users.activate') }}
+      </button>
+    </form>
+    <form method="post" action="/users/{{ user.id }}/reset-password" class="inline">
+      <button type="submit" class="outline">{{ t('users.reset_password') }}</button>
+    </form>
+  </div>
+</section>
+{% endif %}
+
+<p><a href="/users">{{ t('common.back') }}</a></p>
+{% endblock %}

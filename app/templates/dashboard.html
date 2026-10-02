@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<hgroup>
+  <h1>{{ t('dashboard.heading', name=current_user.display_name) }}</h1>
+  <p>
+    {{ t('dashboard.roles') }}:
+    {% for role in current_user.roles %}{{ t(role.name_key) }}{% if not loop.last %}, {% endif %}{% endfor %}
+  </p>
+</hgroup>
+
+<div class="grid cards">
+  {% if current_user.has_permission('users.manage') %}
+    <article><h3><a href="/users">{{ t('dashboard.users') }}</a></h3><p>{{ t('dashboard.users_manage_help') }}</p></article>
+  {% elif current_user.has_permission('users.read') %}
+    <article><h3><a href="/users">{{ t('dashboard.users') }}</a></h3><p>{{ t('dashboard.users_read_help') }}</p></article>
+  {% endif %}
+  {% if current_user.has_permission('settings.read') %}
+    <article><h3><a href="/admin/settings">{{ t('dashboard.settings') }}</a></h3><p>{{ t('dashboard.settings_help') }}</p></article>
+  {% endif %}
+  {% if current_user.has_any_permission('audit.read_users', 'audit.read_all') %}
+    <article><h3><a href="/admin/audit">{{ t('dashboard.audit') }}</a></h3><p>{{ t('dashboard.audit_help') }}</p></article>
+  {% endif %}
+  {% if current_user.has_permission('barrels.read') %}
+    <article class="muted"><h3>{{ t('dashboard.barrels') }}</h3><p>{{ t('dashboard.coming_phase', phase=2) }}</p></article>
+  {% endif %}
+  {% if current_user.has_any_permission('orders.create', 'orders.read_all') %}
+    <article class="muted"><h3>{{ t('dashboard.orders') }}</h3><p>{{ t('dashboard.coming_phase', phase=3) }}</p></article>
+  {% endif %}
+  {% if current_user.has_permission('invoices.read') %}
+    <article class="muted"><h3>{{ t('dashboard.invoices') }}</h3><p>{{ t('dashboard.coming_phase', phase=6) }}</p></article>
+  {% endif %}
+  {% if current_user.has_permission('reports.read_all') %}
+    <article class="muted"><h3>{{ t('dashboard.reports') }}</h3><p>{{ t('dashboard.coming_phase', phase=8) }}</p></article>
+  {% endif %}
+</div>
+{% endblock %}

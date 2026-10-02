@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ t('users.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('users.title') }}</h1>
+  {% if can_manage %}<a href="/users/new" role="button">{{ t('users.new') }}</a>{% endif %}
+</div>
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>{{ t('users.username') }}</th>
+      <th>{{ t('users.display_name') }}</th>
+      <th>{{ t('users.roles') }}</th>
+      <th>{{ t('users.customer_type') }}</th>
+      <th>{{ t('users.status') }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in users %}
+    <tr>
+      <td><a href="/users/{{ u.id }}">{{ u.username }}</a></td>
+      <td>{{ u.display_name }}</td>
+      <td>{% for role in u.roles %}{{ t(role.name_key) }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+      <td>{{ t('customer_type.' ~ u.customer_type.value) }}</td>
+      <td>{% if u.is_active %}{{ t('users.active') }}{% else %}<span class="muted">{{ t('users.inactive') }}</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

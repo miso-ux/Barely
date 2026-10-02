@@ -15,7 +15,10 @@ def _load(locale: str) -> dict[str, str]:
     return _catalogs[locale]
 
 
-def t(key: str, locale: str = _DEFAULT_LOCALE, **kwargs: object) -> str:
-    """Translate `key`; falls back to the key itself so a missing text is visible, not fatal."""
+def t(key: str, /, locale: str = _DEFAULT_LOCALE, **kwargs: object) -> str:
+    """Translate `key`; falls back to the key itself so a missing text is visible, not fatal.
+
+    `key` is positional-only so that messages may themselves use a `{key}` placeholder.
+    """
     text = _load(locale).get(key, key)
     return text.format(**kwargs) if kwargs else text
