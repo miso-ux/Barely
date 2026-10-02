@@ -1,0 +1,9 @@
+{
+  "app.title": "Evidencia barelov",
+  "app.tagline": "Evidencia a výdaj barelov s vodou",
+  "home.heading": "Aplikácia beží",
+  "home.skeleton_notice": "Toto je kostra projektu. Prihlásenie a roly pribudnú vo fáze 1.",
+  "home.db_ok": "Databáza je pripojená.",
+  "home.db_error": "Databáza nie je dostupná.",
+  "nav.home": "Domov"
+}

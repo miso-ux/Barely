@@ -1,0 +1,45 @@
+name: barely
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-barely}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-barely}
+      POSTGRES_DB: ${POSTGRES_DB:-barely}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-barely} -d ${POSTGRES_DB:-barely}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://barely:barely@db:5432/barely}
+      SECRET_KEY: ${SECRET_KEY:-change-me-demo-secret}
+      APP_ENV: ${APP_ENV:-development}
+    ports:
+      - "8000:8000"
+    volumes:
+      # Live reload during development; the image already contains a copy for production-like runs.
+      - .:/srv
+    depends_on:
+      db:
+        condition: service_healthy
+
+  adminer:
+    image: adminer:4
+    profiles: ["tools"]
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  dbdata:

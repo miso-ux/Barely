@@ -1,0 +1,48 @@
+[project]
+name = "barely"
+version = "0.1.0"
+description = "Water barrel lending and pump sales registry (demo/MVP)"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "itsdangerous>=2.2",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.13",
+    "pydantic-settings>=2.4",
+    "pwdlib[argon2]>=0.2",
+    "apscheduler>=3.10,<4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "httpx2",
+    "ruff>=0.6",
+]
+
+[tool.uv]
+package = false
+# Dev tools are installed in the image too, so tests and lint run inside the container.
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["."]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "tests"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency injection relies on Depends() in argument defaults.
+extend-immutable-calls = ["fastapi.Depends"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

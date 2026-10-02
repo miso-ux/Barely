@@ -1,0 +1,5 @@
+/* Project-specific overrides on top of Pico CSS. */
+mark.error {
+  background: var(--pico-del-color);
+  color: #fff;
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ t('app.title') }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='pico.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='app.css') }}">
+  <script src="{{ url_for('static', path='htmx.min.js') }}" defer></script>
+</head>
+<body>
+  <header class="container">
+    <nav>
+      <ul>
+        <li><strong><a href="/">{{ t('app.title') }}</a></strong></li>
+      </ul>
+      <ul>
+        {% block nav %}{% endblock %}
+      </ul>
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
