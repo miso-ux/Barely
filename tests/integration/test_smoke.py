@@ -19,6 +19,12 @@ def test_login_page_renders_in_slovak(client: TestClient) -> None:
     assert "Prihlásenie" in response.text
 
 
+def test_login_page_lists_demo_accounts_outside_production(client: TestClient) -> None:
+    response = client.get("/login")
+    assert "Demo účty" in response.text
+    assert "jana.novakova" in response.text and "Demo1234!" in response.text
+
+
 def test_static_assets_are_referenced_relatively(client: TestClient) -> None:
     """Behind an HTTPS reverse proxy absolute http:// asset URLs are blocked as mixed content."""
     html = client.get("/login").text

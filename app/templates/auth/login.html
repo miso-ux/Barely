@@ -21,4 +21,17 @@
     <button type="submit">{{ t('auth.login_button') }}</button>
   </form>
 </article>
+{% if demo_accounts %}
+<article class="narrow demo-accounts">
+  <details>
+    <summary>{{ t('auth.demo_accounts') }}</summary>
+    <p><small>{{ t('auth.demo_accounts_help', password=demo_password) }}</small></p>
+    <ul>
+      {% for username, role in demo_accounts %}
+        <li><code>{{ username }}</code> · {{ t('role.' ~ role) }}</li>
+      {% endfor %}
+    </ul>
+  </details>
+</article>
+{% endif %}
 {% endblock %}

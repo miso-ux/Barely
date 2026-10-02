@@ -409,6 +409,8 @@
   "auth.register_button": "Vytvoriť účet",
   "auth.registered": "Účet bol vytvorený, ste prihlásení.",
   "auth.back_to_login": "Späť na prihlásenie",
+  "auth.demo_accounts": "Demo účty",
+  "auth.demo_accounts_help": "Všetky majú heslo {password}. Prihlasovacie meno píšte celé a malými písmenami. Zoznam sa zobrazuje len mimo produkcie.",
 
   "dashboard.heading": "Vitajte, {name}",
   "dashboard.roles": "Rola",

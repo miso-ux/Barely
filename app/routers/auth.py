@@ -4,7 +4,9 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from app import seed
 from app.auth.deps import get_current_user, login_user, logout_user, require_user
+from app.config import get_settings
 from app.db import get_db
 from app.i18n import t
 from app.models import User
@@ -20,11 +22,26 @@ def _safe_next(target: str) -> str:
     return target if target.startswith("/") and not target.startswith("//") else "/"
 
 
+def _demo_accounts() -> list[tuple[str, str]] | None:
+    """Demo usernames for the login page; hidden in production."""
+    if get_settings().app_env == "production":
+        return None
+    return [(username, role) for username, _name, role, _must in seed.DEMO_USERS]
+
+
 @router.get("/login")
 def login_form(request: Request, user: User | None = Depends(get_current_user)):
     if user is not None:
         return RedirectResponse("/", status.HTTP_303_SEE_OTHER)
-    return render(request, "auth/login.html", {"next": request.query_params.get("next", "/")})
+    return render(
+        request,
+        "auth/login.html",
+        {
+            "next": request.query_params.get("next", "/"),
+            "demo_accounts": _demo_accounts(),
+            "demo_password": seed.DEMO_PASSWORD,
+        },
+    )
 
 
 @router.post("/login")
@@ -41,7 +58,13 @@ def login(
         return render(
             request,
             "auth/login.html",
-            {"error": t(exc.message_key), "username": username, "next": next},
+            {
+                "error": t(exc.message_key),
+                "username": username,
+                "next": next,
+                "demo_accounts": _demo_accounts(),
+                "demo_password": seed.DEMO_PASSWORD,
+            },
             status_code=status.HTTP_400_BAD_REQUEST,
         )
     login_user(request, user)
