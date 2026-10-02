@@ -10,7 +10,7 @@ from app.auth.permissions import Perm
 from app.db import get_db
 from app.i18n import t
 from app.models import Order, OrderKind, OrderStatus, User
-from app.services import dates, notifications, stock
+from app.services import dates, stock, timeline
 from app.services import orders as orders_service
 from app.services import penalties as penalties_service
 from app.services import pumps as pumps_service
@@ -162,7 +162,8 @@ def order_detail(
                 for p in penalties_service.list_penalties(db, user_id=order.user_id)
                 if p.loan.order_id == order.id
             ],
-            "notifications": notifications.for_link(db, f"/orders/{order.id}"),
+            "timeline": timeline.order_timeline(db, order),
+            "format_delta": timeline.format_delta,
         },
     )
 

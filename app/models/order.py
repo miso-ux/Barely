@@ -159,6 +159,7 @@ class Loan(Base):
     order: Mapped[Order] = relationship(back_populates="loans")
     barrel: Mapped[Barrel] = relationship(lazy="joined")
     user: Mapped[User] = relationship(foreign_keys=[user_id])
+    returned_by_user: Mapped[User | None] = relationship(foreign_keys=[returned_by])
 
 
 class Notification(Base):

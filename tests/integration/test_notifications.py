@@ -54,4 +54,4 @@ def test_order_timeline_lists_notifications_with_read_time(client: TestClient, d
     )
     page = client.get(notification.link)
     assert page.status_code == 200
-    assert "Notifikácia" in page.text and "prečítané" in page.text
+    assert "Notifikácia" in page.text and "Notifikácia prečítaná" in page.text

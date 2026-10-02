@@ -2,7 +2,18 @@
 {% block title %}{{ t('audit.title') }} · {{ t('app.title') }}{% endblock %}
 
 {% block content %}
-<h1>{{ t('audit.title') }}</h1>
+<div class="page-header">
+  <h1>{{ t('audit.title') }}</h1>
+  <a href="/admin/audit?{{ query }}{% if query %}&amp;{% endif %}format=csv" role="button" class="outline">{{ t('report.export_csv') }}</a>
+</div>
+<form method="get" action="/admin/audit" class="grid filters-form">
+  <input type="text" name="actor" placeholder="{{ t('audit.who') }}" value="{{ filters.actor }}">
+  <input type="text" name="action" placeholder="{{ t('audit.action') }}" value="{{ filters.action }}">
+  <input type="text" name="entity" placeholder="{{ t('audit.entity') }}" value="{{ filters.entity }}">
+  <input type="date" name="from" value="{{ filters.from }}">
+  <input type="date" name="to" value="{{ filters.to }}">
+  <button type="submit" class="outline">{{ t('common.filter') }}</button>
+</form>
 <div class="overflow-auto">
 <table>
   <thead>

@@ -10,17 +10,19 @@ from datetime import date
 from sqlalchemy.orm import Session
 
 from app.db import SessionLocal
-from app.services import loans, orders
+from app.services import loans, orders, stock
 
 
 def run_with_session(db: Session, *, today: date | None = None) -> dict[str, int]:
     expired = orders.expire_reservations(db, today=today)
     overdue = loans.mark_overdue(db, today=today)
     reminded = loans.send_due_reminders(db, today=today)
+    low_stock = stock.notify_low_stock(db)
     return {
         "expired_reservations": len(expired),
         "overdue_loans": len(overdue),
         "reminders_sent": len(reminded),
+        "low_stock_alerts": int(low_stock),
     }
 
 

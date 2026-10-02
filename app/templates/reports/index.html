@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ t('report.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<h1>{{ t('report.title') }}</h1>
+<p>{{ t('report.intro') }}</p>
+<div class="grid cards">
+  {% for key in reports %}
+  <article>
+    <h3><a href="/reports/{{ key }}">{{ t('report.' ~ key ~ '.title') }}</a></h3>
+    <p>{{ t('report.' ~ key ~ '.help') }}</p>
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

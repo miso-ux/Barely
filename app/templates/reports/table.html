@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ t('report.' ~ table.key ~ '.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('report.' ~ table.key ~ '.title') }}</h1>
+  <div class="actions">
+    <a href="/reports/{{ table.key }}?{{ query }}{% if query %}&amp;{% endif %}format=csv" role="button" class="outline">{{ t('report.export_csv') }}</a>
+    <a href="/reports" role="button" class="outline secondary">{{ t('common.back') }}</a>
+  </div>
+</div>
+<p>{{ t('report.' ~ table.key ~ '.help') }}</p>
+
+<form method="get" action="/reports/{{ table.key }}" class="grid filters-form">
+  {% if table.date_from %}
+    <label>{{ t('report.from') }}<input type="date" name="from" value="{{ filters.date_from.isoformat() }}"></label>
+    <label>{{ t('report.to') }}<input type="date" name="to" value="{{ filters.date_to.isoformat() }}"></label>
+  {% endif %}
+  {% if table.key in ('movements', 'debtors', 'invoices') %}
+    <label>{{ t('orders.user') }}<input type="text" name="user" value="{{ filters.user }}"></label>
+  {% endif %}
+  {% if table.key in ('movements', 'roles') %}
+    <label>{{ t('report.actor') }}<input type="text" name="actor" value="{{ filters.actor }}"></label>
+  {% endif %}
+  {% if table.key in ('movements', 'stock') %}
+    <label>{{ t('barrels.code') }}<input type="text" name="barrel" value="{{ filters.barrel }}"></label>
+    <label>{{ t('barrels.status') }}
+      <select name="status">
+        <option value="">{{ t('common.all') }}</option>
+        {% for s in statuses %}<option value="{{ s }}" {% if filters.status == s %}selected{% endif %}>{{ t('barrel.status.' ~ s) }}</option>{% endfor %}
+      </select>
+    </label>
+  {% endif %}
+  {% if table.key == 'movements' %}
+    <label>{{ t('barrels.reason') }}
+      <select name="reason">
+        <option value="">{{ t('common.all') }}</option>
+        {% for r in reasons %}<option value="{{ r }}" {% if filters.reason == r %}selected{% endif %}>{{ t('barrel.reason.' ~ r) }}</option>{% endfor %}
+      </select>
+    </label>
+  {% endif %}
+  <button type="submit" class="outline">{{ t('common.filter') }}</button>
+</form>
+
+<div class="overflow-auto">
+<table>
+  <thead><tr>{% for field, label in table.columns %}<th>{{ t(label) }}</th>{% endfor %}</tr></thead>
+  <tbody>
+    {% for row in table.rows %}
+    <tr>{% for field, label in table.columns %}<td>{% set v = row.get(field) %}{% if v.__class__.__name__ == 'datetime' %}{{ v | dt }}{% elif v.__class__.__name__ == 'date' %}{{ v | d }}{% else %}{{ v if v is not none else '' }}{% endif %}</td>{% endfor %}</tr>
+    {% else %}
+    <tr><td colspan="{{ table.columns | length }}" class="muted">{{ t('report.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if table.totals %}
+  <tfoot><tr>{% for field, label in table.columns %}<th>{{ table.totals.get(field, '') }}</th>{% endfor %}</tr></tfoot>
+  {% endif %}
+</table>
+</div>
+{% endblock %}

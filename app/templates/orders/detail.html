@@ -118,23 +118,23 @@
 
 <section>
   <h2>{{ t('orders.timeline') }}</h2>
+  <p><small>{{ t('orders.step.requested') }}: {{ order.requested_date | d }}</small></p>
+  <div class="overflow-auto">
   <table>
+    <thead><tr><th>{{ t('orders.step') }}</th><th>{{ t('audit.when') }}</th><th>{{ t('orders.delta') }}</th><th>{{ t('audit.who') }}</th><th></th></tr></thead>
     <tbody>
-      <tr><th>{{ t('orders.step.created') }}</th><td>{{ order.created_at | dt }}</td><td>{{ order.creator.username if order.creator else '' }}</td></tr>
-      <tr><th>{{ t('orders.step.requested') }}</th><td>{{ order.requested_date | d }}</td><td></td></tr>
-      {% if order.ready_at %}<tr><th>{{ t('orders.step.ready') }}</th><td>{{ order.ready_at | dt }}</td><td>{{ order.ready_actor.username if order.ready_actor else '' }}</td></tr>{% endif %}
-      {% if order.issued_at %}<tr><th>{{ t('orders.step.issued') }}</th><td>{{ order.issued_at | dt }}</td><td>{{ order.issue_actor.username if order.issue_actor else '' }}</td></tr>{% endif %}
-      {% if order.closed_at %}<tr><th>{{ t('orders.step.closed') }}</th><td>{{ order.closed_at | dt }}</td><td></td></tr>{% endif %}
-      {% if order.cancelled_at %}<tr><th>{{ t('orders.step.cancelled') }}</th><td>{{ order.cancelled_at | dt }}</td><td>{{ order.cancel_actor.username if order.cancel_actor else t('audit.system') }} · {{ t('order.cancel_reason.' ~ order.cancel_reason) }}</td></tr>{% endif %}
-      {% for n in notifications %}
+      {% for step in timeline %}
       <tr>
-        <th>{{ t('orders.step.notification') }}</th>
-        <td>{{ n.created_at | dt }}{% if n.read_at %} → {{ t('notifications.read_at') }} {{ n.read_at | dt }}{% endif %}</td>
-        <td>{{ t(n.kind, **n.params) }}</td>
+        <th>{{ step.label }}</th>
+        <td>{{ step.at | dt }}</td>
+        <td class="muted">{{ format_delta(step.delta) }}</td>
+        <td>{{ step.who }}</td>
+        <td><small>{{ step.detail }}</small></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </section>
 
 <p><a href="/orders">{{ t('common.back') }}</a></p>

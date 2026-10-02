@@ -158,6 +158,10 @@ def create_order(
         _order_params(order),
         link=f"/orders/{order.id}",
     )
+    # FR-NO-03: the customer gets a confirmation with the pickup date.
+    notifications.notify(
+        db, user, "notification.order.confirmed", _order_params(order), f"/orders/{order.id}"
+    )
     return order
 
 

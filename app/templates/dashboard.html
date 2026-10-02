@@ -82,8 +82,8 @@
   {% if current_user.has_any_permission('invoices.read', 'invoices.draft') %}
     <article><h3><a href="/invoices">{{ t('dashboard.invoices') }}</a></h3><p>{{ t('dashboard.invoices_help') }}</p></article>
   {% endif %}
-  {% if current_user.has_permission('reports.read_all') %}
-    <article class="muted"><h3>{{ t('dashboard.reports') }}</h3><p>{{ t('dashboard.coming_phase', phase=8) }}</p></article>
+  {% if current_user.has_any_permission('reports.read_all', 'reports.read_operations', 'reports.read_invoicing', 'debtors.read') %}
+    <article><h3><a href="/reports">{{ t('dashboard.reports') }}</a></h3><p>{{ t('dashboard.reports_help') }}</p></article>
   {% endif %}
 </div>
 {% endblock %}
