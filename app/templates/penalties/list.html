@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ t('penalties.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('penalties.title') if see_all else t('penalties.my_title') }}</h1>
+  {% if see_all %}<a href="/debtors" role="button" class="outline">{{ t('debtors.title') }}</a>{% endif %}
+</div>
+{% if not see_all %}
+  <p>{{ t('penalties.unpaid_total', amount=unpaid_total) }}</p>
+{% endif %}
+
+<nav class="filters">
+  <ul>
+    <li><a href="/penalties" {% if not selected %}aria-current="page"{% endif %}>{{ t('common.all') }}</a></li>
+    {% for s in statuses %}
+      <li><a href="/penalties?status={{ s.value }}" {% if selected == s %}aria-current="page"{% endif %}>{{ t('penalty.status.' ~ s.value) }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>
+
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      {% if see_all %}<th>{{ t('orders.user') }}</th>{% endif %}
+      <th>{{ t('barrels.code') }}</th>
+      <th>{{ t('penalties.reason') }}</th>
+      <th>{{ t('penalties.amount') }}</th>
+      <th>{{ t('penalties.status') }}</th>
+      <th>{{ t('orders.created_at') }}</th>
+      {% if can_pay or can_cancel %}<th></th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in penalties %}
+    <tr>
+      <td>{{ p.id }}</td>
+      {% if see_all %}<td>{{ p.user.display_name }} <small class="muted">{{ p.user.username }}</small></td>{% endif %}
+      <td><a href="/orders/{{ p.loan.order_id }}">{{ p.barrel.code }}</a></td>
+      <td>{{ t('penalty.reason.' ~ p.reason.value) }}</td>
+      <td>{{ p.amount }} €</td>
+      <td>
+        <span class="badge badge-pen-{{ p.status.value }}">{{ t('penalty.status.' ~ p.status.value) }}</span>
+        {% if p.paid_at %}<br><small class="muted">{{ p.paid_at | dt }}{% if p.payment_note %} · {{ p.payment_note }}{% endif %}</small>{% endif %}
+        {% if p.cancelled_at %}<br><small class="muted">{{ p.cancelled_at | dt }} · {{ p.cancel_reason }}</small>{% endif %}
+      </td>
+      <td>{{ p.created_at | dt }}</td>
+      {% if can_pay or can_cancel %}
+      <td>
+        {% if p.status.value == 'unpaid' %}
+          {% if can_pay %}
+          <form method="post" action="/penalties/{{ p.id }}/pay" class="inline">
+            <input type="text" name="note" placeholder="{{ t('penalties.payment_note') }}" class="small">
+            <button type="submit" class="outline">{{ t('penalties.pay') }}</button>
+          </form>
+          {% endif %}
+          {% if can_cancel %}
+          <form method="post" action="/penalties/{{ p.id }}/cancel" class="inline">
+            <input type="text" name="reason" placeholder="{{ t('penalties.cancel_reason') }}" class="small" required>
+            <button type="submit" class="secondary outline">{{ t('penalties.cancel') }}</button>
+          </form>
+          {% endif %}
+        {% endif %}
+      </td>
+      {% endif %}
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="muted">{{ t('penalties.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

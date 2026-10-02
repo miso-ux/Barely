@@ -133,6 +133,8 @@ class Loan(Base):
     returned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     returned_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     return_note: Mapped[str | None] = mapped_column(Text)
+    # Set once the due-date reminder has gone out, so the daily job never sends it twice.
+    reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     order: Mapped[Order] = relationship(back_populates="loans")
     barrel: Mapped[Barrel] = relationship(lazy="joined")

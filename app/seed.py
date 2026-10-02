@@ -185,7 +185,13 @@ def seed_demo_orders(db: Session) -> int:
     )
     issued = orders_service.place_order(db, user=by_name["user"], quantity=2, requested_date=today)
     orders_service.mark_ready(db, actor=warehouse, order=issued)
-    orders_service.issue_order(db, actor=warehouse, order=issued)
+    loans = orders_service.issue_order(db, actor=warehouse, order=issued)
+    # Backdate one loan so the daily job (button on the warehouse dashboard) has something to
+    # mark overdue during a demo: issued six weeks ago, due at the end of last month.
+    overdue_demo = loans[0]
+    overdue_demo.issued_at = dates.now_utc() - timedelta(days=42)
+    overdue_demo.due_date = dates.due_date_for(overdue_demo.issued_at)
+    db.commit()
     exceptions_service.create_request(
         db,
         user=by_name["jana.novakova"],

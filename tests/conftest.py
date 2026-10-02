@@ -10,6 +10,7 @@ _DEFAULT_URL = "postgresql+psycopg://barely:barely@db:5432/barely"
 _PARTS = urlsplit(os.environ.get("DATABASE_URL", _DEFAULT_URL))
 TEST_DB_NAME = "barely_test"
 os.environ["DATABASE_URL"] = urlunsplit(_PARTS._replace(path=f"/{TEST_DB_NAME}"))
+os.environ["SCHEDULER_ENABLED"] = "false"
 
 import psycopg  # noqa: E402
 import pytest  # noqa: E402
@@ -44,7 +45,7 @@ def reset_database(database):
             text(
                 "TRUNCATE audit_log, settings, user_roles, role_permissions, "
                 "users, roles, permissions, barrel_status_history, barrels, "
-                "notifications, loans, exception_requests, orders "
+                "notifications, penalties, loans, exception_requests, orders "
                 "RESTART IDENTITY CASCADE"
             )
         )

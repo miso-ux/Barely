@@ -310,6 +310,26 @@ def issue_order(db: Session, *, actor: User, order: Order) -> list[Loan]:
     return loans
 
 
+def close_if_all_returned(db: Session, order: Order) -> bool:
+    """Close an issued order once no loan is outstanding. No commit; returns True if closed."""
+    if order.status is not OrderStatus.ISSUED:
+        return False
+    if any(loan.status in (LoanStatus.ON_LOAN, LoanStatus.OVERDUE) for loan in order.loans):
+        return False
+    order.status = OrderStatus.CLOSED
+    order.closed_at = dates.now_utc()
+    audit.record(
+        db,
+        actor=None,
+        action="order.closed",
+        entity_type="order",
+        entity_id=order.id,
+        before={"status": OrderStatus.ISSUED.value},
+        after={"status": OrderStatus.CLOSED.value},
+    )
+    return True
+
+
 def expire_reservations(db: Session, *, today: date | None = None) -> list[Order]:
     """Q-03: open orders not picked up within N working days after the requested date are
     cancelled automatically and the pieces are released. Run by the daily job."""

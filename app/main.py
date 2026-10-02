@@ -1,5 +1,11 @@
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from urllib.parse import quote
+from zoneinfo import ZoneInfo
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import Depends, FastAPI, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -13,6 +19,7 @@ from app.auth.deps import NotAuthenticated, PasswordChangeRequired
 from app.config import get_settings
 from app.db import get_db
 from app.i18n import t
+from app.jobs import daily
 from app.routers import (
     audit,
     auth,
@@ -21,14 +28,42 @@ from app.routers import (
     exceptions,
     notifications,
     orders,
+    penalties,
     settings,
     users,
 )
 from app.web import BASE_DIR, flash, render
 
+# Uvicorn configures this logger, so startup messages show up next to its own.
+log = logging.getLogger("uvicorn.error")
 app_settings = get_settings()
 
-app = FastAPI(title="Barely", docs_url=None, redoc_url=None)
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    """Start the daily job scheduler with the app (NFR-06). One process, one scheduler."""
+    scheduler: BackgroundScheduler | None = None
+    if app_settings.scheduler_enabled:
+        scheduler = BackgroundScheduler(timezone=ZoneInfo(app_settings.timezone))
+        scheduler.add_job(
+            daily.run,
+            CronTrigger(hour=app_settings.daily_job_hour, minute=0),
+            id="daily",
+            misfire_grace_time=6 * 3600,
+            coalesce=True,
+        )
+        scheduler.start()
+        log.info(
+            "daily job scheduled at %02d:00 %s", app_settings.daily_job_hour, app_settings.timezone
+        )
+    try:
+        yield
+    finally:
+        if scheduler is not None:
+            scheduler.shutdown(wait=False)
+
+
+app = FastAPI(title="Barely", docs_url=None, redoc_url=None, lifespan=lifespan)
 app.add_middleware(
     SessionMiddleware,
     secret_key=app_settings.secret_key,
@@ -46,6 +81,7 @@ app.include_router(barrels.router)
 app.include_router(orders.router)
 app.include_router(exceptions.router)
 app.include_router(notifications.router)
+app.include_router(penalties.router)
 
 
 @app.exception_handler(NotAuthenticated)

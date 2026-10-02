@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     app_env: str = "development"
     # Secure flag on the session cookie. Turn on when served over HTTPS (reverse proxy with TLS).
     secure_cookies: bool = False
+    # In-process scheduler for the daily job. Tests turn it off.
+    scheduler_enabled: bool = True
+    daily_job_hour: int = 2
     # Due dates are calendar dates in this zone; all timestamps are stored in UTC.
     timezone: str = "Europe/Bratislava"
 

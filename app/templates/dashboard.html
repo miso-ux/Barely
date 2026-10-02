@@ -25,7 +25,14 @@
       <h3>{{ active_loans | length }}</h3>
       <p>{{ t('dashboard.active_loans') }}</p>
     </article>
+    <article>
+      <h3>{{ unpaid_total }} €</h3>
+      <p><a href="/penalties">{{ t('dashboard.unpaid_penalties') }}</a></p>
+    </article>
   </div>
+  {% if is_debtor %}
+    <article class="flash flash-error">{{ t('dashboard.debtor_warning') }}</article>
+  {% endif %}
   {% if active_loans %}
   <table>
     <thead><tr><th>{{ t('barrels.code') }}</th><th>{{ t('loans.due_date') }}</th><th>{{ t('orders.order') }}</th></tr></thead>
@@ -33,7 +40,7 @@
       {% for loan in active_loans %}
       <tr>
         <td>{{ loan.barrel.code }}</td>
-        <td>{{ loan.due_date | d }}</td>
+        <td>{{ loan.due_date | d }}{% if loan.status.value == 'overdue' %} <span class="badge badge-loan-overdue">{{ t('loan.status.overdue') }}</span>{% endif %}</td>
         <td><a href="/orders/{{ loan.order_id }}">#{{ loan.order_id }}</a></td>
       </tr>
       {% endfor %}

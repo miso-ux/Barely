@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ t('debtors.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('debtors.title') }}</h1>
+  <a href="/penalties" role="button" class="outline">{{ t('penalties.title') }}</a>
+</div>
+<p>{{ t('debtors.help') }}</p>
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>{{ t('orders.user') }}</th>
+      <th>{{ t('debtors.overdue_loans') }}</th>
+      <th>{{ t('debtors.unpaid_amount') }}</th>
+      <th>{{ t('debtors.days_overdue') }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td><a href="/orders?user={{ r.user.username }}">{{ r.user.display_name }}</a> <small class="muted">{{ r.user.username }}</small></td>
+      <td>{{ r.overdue_loans }}</td>
+      <td>{{ r.unpaid_amount }} €</td>
+      <td>{{ r.days_overdue }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">{{ t('debtors.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

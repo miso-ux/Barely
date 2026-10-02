@@ -13,6 +13,7 @@ from app.models.order import (
     OrderKind,
     OrderStatus,
 )
+from app.models.penalty import Penalty, PenaltyReason, PenaltyStatus
 from app.models.rbac import Permission, Role, RolePermission, UserRole
 from app.models.setting import Setting
 from app.models.user import CustomerType, User
@@ -32,6 +33,9 @@ __all__ = [
     "Order",
     "OrderKind",
     "OrderStatus",
+    "Penalty",
+    "PenaltyReason",
+    "PenaltyStatus",
     "Permission",
     "Role",
     "RolePermission",

@@ -12,6 +12,8 @@ from app.i18n import t
 from app.models import Order, OrderStatus, User
 from app.services import dates, notifications, stock
 from app.services import orders as orders_service
+from app.services import penalties as penalties_service
+from app.services import returns as returns_service
 from app.services import settings as settings_service
 from app.services.errors import DomainError
 from app.services.orders import CancelReason
@@ -143,6 +145,13 @@ def order_detail(
             and (can_manage or (is_owner and actor.has_permission(Perm.ORDERS_CREATE))),
             "can_prepare": can_manage and order.status is OrderStatus.PENDING,
             "can_issue": can_manage and order.status is OrderStatus.READY,
+            "outstanding": returns_service.outstanding_loans(order),
+            "can_return": can_manage and order.status is OrderStatus.ISSUED,
+            "penalties": [
+                p
+                for p in penalties_service.list_penalties(db, user_id=order.user_id)
+                if p.loan.order_id == order.id
+            ],
             "notifications": notifications.for_link(db, f"/orders/{order.id}"),
         },
     )
@@ -183,6 +192,32 @@ def mark_ready(
         flash(request, t(exc.message_key, **exc.params), "error")
     else:
         flash(request, t("orders.marked_ready"), "success")
+    return RedirectResponse(f"/orders/{order.id}", status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/{order_id}/return")
+async def return_barrels(
+    request: Request,
+    order_id: int,
+    actor: User = Depends(require_permission(Perm.ORDERS_MANAGE)),
+    db: Session = Depends(get_db),
+):
+    """Form fields: condition_<loan_id> = ok | damaged | lost, plus an optional note."""
+    order = _get_order_or_404(db, order_id)
+    form = await request.form()
+    conditions = {
+        int(key.removeprefix("condition_")): str(value)
+        for key, value in form.items()
+        if key.startswith("condition_") and value
+    }
+    try:
+        processed = returns_service.return_barrels(
+            db, actor=actor, order=order, conditions=conditions, note=str(form.get("note", ""))
+        )
+    except DomainError as exc:
+        flash(request, t(exc.message_key, **exc.params), "error")
+    else:
+        flash(request, t("orders.returned", count=len(processed)), "success")
     return RedirectResponse(f"/orders/{order.id}", status.HTTP_303_SEE_OTHER)
 
 

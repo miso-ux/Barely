@@ -26,6 +26,7 @@ services:
       APP_ENV: ${APP_ENV:-development}
       FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-*}
       SECURE_COOKIES: ${SECURE_COOKIES:-false}
+      SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-true}
     ports:
       - "8000:8000"
     volumes:

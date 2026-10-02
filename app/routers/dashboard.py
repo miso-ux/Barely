@@ -4,8 +4,10 @@ from sqlalchemy.orm import Session
 from app.auth.deps import require_user
 from app.auth.permissions import Perm
 from app.db import get_db
-from app.models import OrderStatus, User
+from app.models import LoanStatus, OrderStatus, User
+from app.services import debtors as debtors_service
 from app.services import orders as orders_service
+from app.services import penalties as penalties_service
 from app.services import stock
 from app.web import render
 
@@ -23,6 +25,12 @@ def dashboard(request: Request, user: User = Depends(require_user), db: Session 
             o for o in own if o.status in (OrderStatus.PENDING, OrderStatus.READY)
         ]
         context["active_loans"] = [
-            loan for o in own if o.status is OrderStatus.ISSUED for loan in o.loans
+            loan
+            for o in own
+            if o.status is OrderStatus.ISSUED
+            for loan in o.loans
+            if loan.status in (LoanStatus.ON_LOAN, LoanStatus.OVERDUE)
         ]
+        context["unpaid_total"] = penalties_service.unpaid_total(db, user.id)
+        context["is_debtor"] = debtors_service.is_debtor(db, user)
     return render(request, "dashboard.html", context)

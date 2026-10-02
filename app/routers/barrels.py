@@ -8,12 +8,14 @@ from app.auth.deps import require_permission
 from app.auth.permissions import Perm
 from app.db import get_db
 from app.i18n import t
+from app.jobs import daily
 from app.models import Barrel, BarrelStatus, User
+from app.services import audit, stock
 from app.services import barrels as barrels_service
+from app.services import debtors as debtors_service
 from app.services import exceptions as exceptions_service
 from app.services import orders as orders_service
 from app.services import settings as settings_service
-from app.services import stock
 from app.services.errors import DomainError
 from app.web import flash, render
 
@@ -49,8 +51,26 @@ def warehouse_dashboard(
             "statuses": list(BarrelStatus),
             "orders_by_date": orders_service.open_orders_by_date(db),
             "pending_exceptions": exceptions_service.pending_count(db),
+            "debtors": len(debtors_service.list_debtors(db)),
+            "can_run_daily": actor.has_permission(Perm.ORDERS_MANAGE),
         },
     )
+
+
+@router.post("/warehouse/run-daily")
+def run_daily_job(
+    request: Request,
+    actor: User = Depends(require_permission(Perm.ORDERS_MANAGE)),
+    db: Session = Depends(get_db),
+):
+    """Manual trigger of the daily job for demos; the scheduler runs it every night anyway."""
+    summary = daily.run_with_session(db)
+    audit.record(
+        db, actor=actor, action="job.daily_run", entity_type="job", entity_id="daily", after=summary
+    )
+    db.commit()
+    flash(request, t("warehouse.daily_done", **summary), "success")
+    return RedirectResponse("/warehouse", status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/barrels")

@@ -125,3 +125,15 @@ class JustificationRequired(DomainError):
 
 class InvalidExceptionTransition(DomainError):
     message_key = "error.invalid_exception_transition"
+
+
+class NothingToReturn(DomainError):
+    message_key = "error.nothing_to_return"
+
+
+class InvalidReturnCondition(DomainError):
+    message_key = "error.invalid_return_condition"
+
+
+class InvalidPenaltyTransition(DomainError):
+    message_key = "error.invalid_penalty_transition"

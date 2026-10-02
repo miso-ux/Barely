@@ -71,8 +71,19 @@
   {% endif %}
 </section>
 
-<section class="muted">
-  <h2>{{ t('warehouse.later') }}</h2>
-  <p>{{ t('warehouse.later_help') }}</p>
+<section>
+  <div class="page-header">
+    <h2>{{ t('debtors.title') }}{% if debtors %} ({{ debtors }}){% endif %}</h2>
+    <div class="actions">
+      <a href="/debtors" role="button" class="outline">{{ t('debtors.title') }}</a>
+      <a href="/penalties" role="button" class="outline">{{ t('penalties.title') }}</a>
+      {% if can_run_daily %}
+      <form method="post" action="/warehouse/run-daily" class="inline">
+        <button type="submit" class="secondary outline" title="{{ t('warehouse.daily_help') }}">{{ t('warehouse.run_daily') }}</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  <p><small>{{ t('warehouse.daily_help') }}</small></p>
 </section>
 {% endblock %}

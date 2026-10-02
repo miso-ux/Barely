@@ -33,8 +33,9 @@
 <section>
   <h2>{{ t('orders.assigned_barrels') }}</h2>
   <p>{{ t('orders.assigned_help') }}</p>
+  {% if can_return and outstanding %}<form method="post" action="/orders/{{ order.id }}/return" id="return-form"></form>{% endif %}
   <table>
-    <thead><tr><th>{{ t('barrels.code') }}</th><th>{{ t('loans.sequence') }}</th><th>{{ t('loans.due_date') }}</th><th>{{ t('loans.price') }}</th><th>{{ t('loans.status') }}</th></tr></thead>
+    <thead><tr><th>{{ t('barrels.code') }}</th><th>{{ t('loans.sequence') }}</th><th>{{ t('loans.due_date') }}</th><th>{{ t('loans.price') }}</th><th>{{ t('loans.status') }}</th>{% if can_return and outstanding %}<th>{{ t('returns.condition') }}</th>{% endif %}</tr></thead>
     <tbody>
       {% for loan in order.loans %}
       <tr>
@@ -42,11 +43,53 @@
         <td>{{ loan.loan_sequence }}</td>
         <td>{{ loan.due_date | d }}</td>
         <td>{{ loan.loan_price }} €</td>
-        <td>{{ t('loan.status.' ~ loan.status.value) }}</td>
+        <td>
+          <span class="badge badge-loan-{{ loan.status.value }}">{{ t('loan.status.' ~ loan.status.value) }}</span>
+          {% if loan.returned_at %}<br><small class="muted">{{ loan.returned_at | dt }}</small>{% endif %}
+        </td>
+        {% if can_return and outstanding %}
+        <td>
+          {% if loan in outstanding %}
+          <select name="condition_{{ loan.id }}" form="return-form">
+            <option value="">{{ t('returns.not_now') }}</option>
+            <option value="ok">{{ t('returns.ok') }}</option>
+            <option value="damaged">{{ t('returns.damaged') }}</option>
+            <option value="lost">{{ t('returns.lost') }}</option>
+          </select>
+          {% endif %}
+        </td>
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  {% if can_return and outstanding %}
+  <div class="grid">
+    <input type="text" name="note" form="return-form" placeholder="{{ t('returns.note') }}">
+    <button type="submit" form="return-form">{{ t('returns.submit') }}</button>
+  </div>
+  <p><small>{{ t('returns.help') }}</small></p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if penalties %}
+<section>
+  <h2>{{ t('penalties.title') }}</h2>
+  <table>
+    <thead><tr><th>{{ t('barrels.code') }}</th><th>{{ t('penalties.reason') }}</th><th>{{ t('penalties.amount') }}</th><th>{{ t('penalties.status') }}</th></tr></thead>
+    <tbody>
+      {% for p in penalties %}
+      <tr>
+        <td>{{ p.barrel.code }}</td>
+        <td>{{ t('penalty.reason.' ~ p.reason.value) }}</td>
+        <td>{{ p.amount }} €</td>
+        <td><span class="badge badge-pen-{{ p.status.value }}">{{ t('penalty.status.' ~ p.status.value) }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p><a href="/penalties">{{ t('penalties.all_link') }}</a></p>
 </section>
 {% endif %}
 
