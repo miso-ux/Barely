@@ -24,6 +24,8 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://barely:barely@db:5432/barely}
       SECRET_KEY: ${SECRET_KEY:-change-me-demo-secret}
       APP_ENV: ${APP_ENV:-development}
+      FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-*}
+      SECURE_COOKIES: ${SECURE_COOKIES:-false}
     ports:
       - "8000:8000"
     volumes:

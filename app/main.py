@@ -32,7 +32,7 @@ app = FastAPI(title="Barely", docs_url=None, redoc_url=None)
 app.add_middleware(
     SessionMiddleware,
     secret_key=app_settings.secret_key,
-    https_only=app_settings.app_env == "production",
+    https_only=app_settings.secure_cookies or app_settings.app_env == "production",
     same_site="lax",
 )
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")

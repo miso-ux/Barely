@@ -4,9 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ t('app.title') }}{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', path='pico.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', path='app.css') }}">
-  <script src="{{ url_for('static', path='htmx.min.js') }}" defer></script>
+  {# Root-relative paths on purpose: absolute url_for() URLs break behind an HTTPS reverse proxy. #}
+  <link rel="stylesheet" href="/static/pico.min.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js" defer></script>
 </head>
 <body>
   <header class="container">

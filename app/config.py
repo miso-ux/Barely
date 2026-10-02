@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://barely:barely@db:5432/barely"
     secret_key: str = "change-me-demo-secret"
     app_env: str = "development"
+    # Secure flag on the session cookie. Turn on when served over HTTPS (reverse proxy with TLS).
+    secure_cookies: bool = False
     # Due dates are calendar dates in this zone; all timestamps are stored in UTC.
     timezone: str = "Europe/Bratislava"
 
