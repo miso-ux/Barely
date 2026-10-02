@@ -53,8 +53,7 @@ class BarrelStatusHistory(Base):
     reason: Mapped[str] = mapped_column(String(50))  # machine code, translated in UI
     note: Mapped[str | None] = mapped_column(Text)
     actor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
-    # Related loan; the foreign key is added in phase 3 together with the loans table.
-    loan_id: Mapped[int | None] = mapped_column(Integer)
+    loan_id: Mapped[int | None] = mapped_column(ForeignKey("loans.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     barrel: Mapped[Barrel] = relationship(back_populates="history")

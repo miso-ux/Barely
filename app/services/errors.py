@@ -81,3 +81,47 @@ class InvalidBarrelCode(DomainError):
 
 class BarrelCodeTaken(DomainError):
     message_key = "error.barrel_code_taken"
+
+
+class InvalidQuantity(DomainError):
+    message_key = "error.invalid_quantity"
+
+
+class OverOrderLimit(DomainError):
+    message_key = "error.over_order_limit"
+
+
+class DateInPast(DomainError):
+    message_key = "error.date_in_past"
+
+
+class DateTooFar(DomainError):
+    message_key = "error.date_too_far"
+
+
+class DebtorBlocked(DomainError):
+    message_key = "error.debtor_blocked"
+
+
+class NotEnoughFree(DomainError):
+    message_key = "error.not_enough_free"
+
+
+class InvalidOrderTransition(DomainError):
+    message_key = "error.invalid_order_transition"
+
+
+class NotOrderOwner(DomainError):
+    message_key = "error.forbidden"
+
+
+class NotAnException(DomainError):
+    message_key = "error.not_an_exception"
+
+
+class JustificationRequired(DomainError):
+    message_key = "error.justification_required"
+
+
+class InvalidExceptionTransition(DomainError):
+    message_key = "error.invalid_exception_transition"

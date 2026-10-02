@@ -6,8 +6,16 @@ from app.main import app
 from tests.conftest import login
 
 WRITE_METHODS = {"post", "put", "patch", "delete"}
-# Endpoints every signed-in person may use for their own session.
-ALLOWED_FOR_EVERYONE = {"/login", "/logout", "/password", "/register"}
+# Endpoints every signed-in person may use for their own session: login, own password and
+# marking their own notifications as read (the read time is evidence, FR-NO-05).
+ALLOWED_FOR_EVERYONE = {
+    "/login",
+    "/logout",
+    "/password",
+    "/register",
+    "/notifications/{notification_id}/read",
+    "/notifications/read-all",
+}
 
 
 def _write_endpoints() -> list[tuple[str, str]]:

@@ -1,6 +1,6 @@
 # Otvorené otázky
 
-Projekt: Evidencia a výdaj barelov s vodou. Stav k 2. 10. 2026. Q-01, Q-02, Q-07 a Q-08 sú vyriešené (ID sa nepoužíva znova).
+Projekt: Evidencia a výdaj barelov s vodou. Stav k 2. 10. 2026. Q-01, Q-02, Q-03, Q-07 a Q-08 sú vyriešené (ID sa nepoužíva znova).
 Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.md`.
 
 ## Ako s týmto súborom pracovať
@@ -13,7 +13,6 @@ Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.
 
 | ID | Téma | Treba vyriešiť pred | Blokuje? |
 |---|---|---|---|
-| Q-03 | Platnosť rezervácie a horizont objednávky | Fáza 3 | Čiastočne |
 | Q-04 | Poškodený barel: oprava alebo odpis | Fáza 4 | Nie, návrh stačí |
 | Q-05 | Vrátenie po lehote pred zaplatením pokuty | Fáza 4 | Nie, návrh stačí |
 | Q-06 | Pumpy: typy, cena, limity | Fáza 5 | Čiastočne |
@@ -21,18 +20,6 @@ Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.
 | Q-10 | Uchovávanie záznamov a GDPR | Pred ostrým nasadením | Nie pre demo |
 | Q-11 | Externí zákazníci | Pred ich spustením | Nie pre demo |
 | Q-12 | Informovanie zamestnancov o Supervízorovi | Pred fázou 8 | Nie pre demo |
-
----
-
-## Q-03 Platnosť rezervácie a horizont objednávky
-
-**Otázka:** Ako dlho platí rezervácia, ak sa používateľ nedostaví na vyzdvihnutie? Ako ďaleko dopredu možno objednať?
-
-**Prečo na tom záleží:** Rezervované kusy sa počítajú do dostupnosti. Bez limitu by neprevzaté objednávky blokovali sklad.
-
-**Návrh:** Rezervácia platí 3 pracovné dni od požadovaného dátumu, potom sa automaticky stornuje, kusy sa uvoľnia a skladník dostane notifikáciu. Objednať sa dá najviac 30 dní dopredu a nie do minulosti. Oba limity budú v konfigurácii.
-
-**Rozhodnutie:** zatiaľ nie
 
 ---
 
@@ -135,6 +122,7 @@ Súvisiace dokumenty: `funkcne-poziadavky-evidencia-barelov.md` (v0.2), `CLAUDE.
 | Pokuta | 10 € za nevrátený alebo poškodený barel, po zaplatení sa barel označí ako stratený |
 | Mazanie | Nič sa nemaže, len mení stav a ukladá história |
 | Rozsah dema (býv. Q-02) | Tenký rez, fázy 1 až 4: prihlásenie a roly, sklad barelov, objednávka, výdaj s automatickým výberom barela, vrátenie, pokuta. Pumpy, faktúry a Supervízor až potom |
+| Platnosť rezervácie a horizont objednávky (býv. Q-03, 2. 10. 2026) | Rezervácia platí 3 pracovné dni od požadovaného dátumu (`reservation_validity_days`), potom ju denná úloha automaticky stornuje, kusy uvoľní a upozorní používateľa aj skladníka. Objednať možno najviac 30 dní dopredu (`order_horizon_days`) a nie do minulosti. Sviatky sa zatiaľ nezohľadňujú |
 | Kto mení konfiguráciu (býv. Q-07, 2. 10. 2026) | Super admin cez oprávnenie `settings.manage`, Supervízor len číta (`settings.read`), každá zmena ide do audit logu. Oprávnenie možno neskôr dať inej role bez zásahu do kódu |
 | Pomenovanie rolí (býv. Q-08, 2. 10. 2026) | V UI „Skladník" a „Supervízor". Kódy zostávajú `warehouse` a `supervisor`, názvy sú v prekladovom slovníku |
 | Technológie a prostredie (býv. Q-01, 2. 10. 2026) | Možnosť A: Python 3.12 + FastAPI, Jinja2 + HTMX, PostgreSQL 16, SQLAlchemy + Alembic, pytest, uv, Ruff. Všetko v Docker Compose (`app`, `db`), demo v Docker Desktop, neskôr Linux server. Prihlásenie meno + heslo so session, pripravené na Entra ID/Google cez Authlib (OIDC). Zamietnuté: TypeScript/Next.js, .NET/Blazor. Detail v `CLAUDE.md` kap. 8 |

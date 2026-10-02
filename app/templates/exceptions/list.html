@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ t('exceptions.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('exceptions.title') }}</h1>
+  {% if can_create %}<a href="/exceptions/new" role="button">{{ t('exceptions.new') }}</a>{% endif %}
+</div>
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      {% if see_all %}<th>{{ t('orders.user') }}</th>{% endif %}
+      <th>{{ t('orders.quantity') }}</th>
+      <th>{{ t('orders.requested_date') }}</th>
+      <th>{{ t('exceptions.status') }}</th>
+      <th>{{ t('orders.created_at') }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in requests %}
+    <tr>
+      <td><a href="/exceptions/{{ r.id }}">#{{ r.id }}</a></td>
+      {% if see_all %}<td>{{ r.user.display_name }} <small class="muted">{{ r.user.username }}</small></td>{% endif %}
+      <td>{{ r.quantity }}</td>
+      <td>{{ r.requested_date | d }}</td>
+      <td><span class="badge badge-exc-{{ r.status.value }}">{{ t('exception.status.' ~ r.status.value) }}</span></td>
+      <td>{{ r.created_at | dt }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted">{{ t('exceptions.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

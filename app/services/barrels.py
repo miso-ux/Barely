@@ -110,19 +110,6 @@ def status_counts(db: Session) -> dict[BarrelStatus, int]:
     return counts
 
 
-def reserved_count(db: Session) -> int:
-    """Pieces reserved by pending orders. Orders arrive in phase 3; nothing is reserved yet."""
-    return 0
-
-
-def free_count(db: Session) -> int:
-    """FR-SK-02: barrels in stock minus pieces in active reservations."""
-    in_stock = db.scalar(
-        select(func.count()).select_from(Barrel).where(Barrel.status == BarrelStatus.IN_STOCK)
-    )
-    return max(int(in_stock or 0) - reserved_count(db), 0)
-
-
 def near_limit(db: Session) -> list[Barrel]:
     """Barrels still in circulation whose loan count is close to the configured limit."""
     limit = settings_service.get_int(db, "loan_limit")

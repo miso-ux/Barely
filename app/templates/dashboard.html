@@ -9,6 +9,40 @@
   </p>
 </hgroup>
 
+{% if current_user.has_permission('orders.create') %}
+<section>
+  <div class="grid stats">
+    <article>
+      <h3>{{ free }}</h3>
+      <p>{{ t('warehouse.free') }}</p>
+      <a href="/orders/new" role="button">{{ t('orders.new') }}</a>
+    </article>
+    <article>
+      <h3>{{ open_orders | length }}</h3>
+      <p><a href="/orders">{{ t('dashboard.open_orders') }}</a></p>
+    </article>
+    <article>
+      <h3>{{ active_loans | length }}</h3>
+      <p>{{ t('dashboard.active_loans') }}</p>
+    </article>
+  </div>
+  {% if active_loans %}
+  <table>
+    <thead><tr><th>{{ t('barrels.code') }}</th><th>{{ t('loans.due_date') }}</th><th>{{ t('orders.order') }}</th></tr></thead>
+    <tbody>
+      {% for loan in active_loans %}
+      <tr>
+        <td>{{ loan.barrel.code }}</td>
+        <td>{{ loan.due_date | d }}</td>
+        <td><a href="/orders/{{ loan.order_id }}">#{{ loan.order_id }}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</section>
+{% endif %}
+
 <div class="grid cards">
   {% if current_user.has_permission('users.manage') %}
     <article><h3><a href="/users">{{ t('dashboard.users') }}</a></h3><p>{{ t('dashboard.users_manage_help') }}</p></article>
@@ -25,7 +59,10 @@
     <article><h3><a href="/warehouse">{{ t('dashboard.barrels') }}</a></h3><p>{{ t('dashboard.barrels_help') }}</p></article>
   {% endif %}
   {% if current_user.has_any_permission('orders.create', 'orders.read_all') %}
-    <article class="muted"><h3>{{ t('dashboard.orders') }}</h3><p>{{ t('dashboard.coming_phase', phase=3) }}</p></article>
+    <article><h3><a href="/orders">{{ t('dashboard.orders') }}</a></h3><p>{{ t('dashboard.orders_help') }}</p></article>
+  {% endif %}
+  {% if current_user.has_any_permission('exceptions.create', 'exceptions.decide', 'orders.read_all') %}
+    <article><h3><a href="/exceptions">{{ t('dashboard.exceptions') }}</a></h3><p>{{ t('dashboard.exceptions_help') }}</p></article>
   {% endif %}
   {% if current_user.has_permission('invoices.read') %}
     <article class="muted"><h3>{{ t('dashboard.invoices') }}</h3><p>{{ t('dashboard.coming_phase', phase=6) }}</p></article>

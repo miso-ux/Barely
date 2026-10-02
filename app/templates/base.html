@@ -16,6 +16,9 @@
       </ul>
       <ul>
         {% if current_user %}
+          <li>
+            <a href="/notifications" class="bell" title="{{ t('nav.notifications') }}">&#128276;{% if unread_notifications %}<span class="pill">{{ unread_notifications }}</span>{% endif %}</a>
+          </li>
           <li class="muted">{{ current_user.display_name }}</li>
           <li><a href="/password">{{ t('nav.password') }}</a></li>
           <li>

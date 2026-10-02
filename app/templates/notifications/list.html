@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ t('notifications.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('notifications.title') }}</h1>
+  {% if unread_notifications %}
+    <form method="post" action="/notifications/read-all" class="inline"><button type="submit" class="outline">{{ t('notifications.mark_all_read') }}</button></form>
+  {% endif %}
+</div>
+<div class="overflow-auto">
+<table>
+  <tbody>
+    {% for n in notifications %}
+    <tr class="{{ 'unread' if not n.read_at else '' }}">
+      <td>{{ n.created_at | dt }}</td>
+      <td>{{ t(n.kind, **n.params) }}</td>
+      <td>
+        {% if n.read_at %}
+          <small class="muted">{{ t('notifications.read_at') }} {{ n.read_at | dt }}</small>
+        {% else %}
+          <form method="post" action="/notifications/{{ n.id }}/read" class="inline"><button type="submit" class="outline">{{ t('notifications.open') if n.link else t('notifications.mark_read') }}</button></form>
+        {% endif %}
+        {% if n.link and n.read_at %}<a href="{{ n.link }}">{{ t('notifications.open') }}</a>{% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td class="muted">{{ t('notifications.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

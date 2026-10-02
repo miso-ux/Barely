@@ -26,3 +26,16 @@ table code { font-size: 0.8em; white-space: pre-wrap; word-break: break-word; }
 .badge-lost { background: #c62828; color: #fff; }
 .badge-retired { background: #6d4c41; color: #fff; }
 .badge-written_off { background: #424242; color: #fff; }
+.badge-order-pending { background: #f9a825; color: #000; }
+.badge-order-ready { background: #1565c0; color: #fff; }
+.badge-order-issued { background: #2e7d32; color: #fff; }
+.badge-order-closed { background: #424242; color: #fff; }
+.badge-order-cancelled { background: #9e9e9e; color: #fff; }
+.badge-exc-pending { background: #f9a825; color: #000; }
+.badge-exc-approved { background: #2e7d32; color: #fff; }
+.badge-exc-rejected { background: #c62828; color: #fff; }
+.bell { text-decoration: none; position: relative; }
+.pill { display: inline-block; min-width: 1.4em; padding: 0 0.35em; margin-left: 0.15em; border-radius: 1em; background: #c62828; color: #fff; font-size: 0.75em; text-align: center; vertical-align: top; }
+tr.unread td { font-weight: bold; }
+.filters-form { align-items: end; }
+.filters-form select, .filters-form input, .filters-form button { margin-bottom: 0; }

@@ -4,6 +4,8 @@ Syncs the permission catalogue and role bundles, inserts missing settings, and c
 accounts that do not exist yet. Existing accounts (and their changed passwords) are left alone.
 """
 
+from datetime import timedelta
+
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
@@ -14,14 +16,17 @@ from app.models import (
     Barrel,
     BarrelStatus,
     CustomerType,
+    Order,
     Permission,
     Role,
     RolePermission,
     User,
     UserRole,
 )
-from app.services import audit, barrel_state
+from app.services import audit, barrel_state, dates
 from app.services import barrels as barrels_service
+from app.services import exceptions as exceptions_service
+from app.services import orders as orders_service
 from app.services import settings as settings_service
 from app.services.barrel_state import Reason
 
@@ -158,6 +163,39 @@ def seed_demo_barrels(db: Session) -> int:
     return len(barrels)
 
 
+def seed_demo_orders(db: Session) -> int:
+    """A few open orders, one issued order and one pending exception request, created only
+    when there are no orders yet. Uses the real services so timestamps, notifications and
+    audit entries look like production data."""
+    if db.scalar(select(func.count()).select_from(Order)):
+        return 0
+    by_name = {u.username: u for u in db.scalars(select(User))}
+    warehouse = by_name["warehouse"]
+    today = dates.today_local()
+
+    orders_service.place_order(
+        db, user=by_name["jana.novakova"], quantity=3, requested_date=today + timedelta(days=2)
+    )
+    orders_service.place_order(
+        db,
+        user=by_name["peter.horvath"],
+        quantity=2,
+        requested_date=today + timedelta(days=1),
+        note="Prosím pripraviť doobeda.",
+    )
+    issued = orders_service.place_order(db, user=by_name["user"], quantity=2, requested_date=today)
+    orders_service.mark_ready(db, actor=warehouse, order=issued)
+    orders_service.issue_order(db, actor=warehouse, order=issued)
+    exceptions_service.create_request(
+        db,
+        user=by_name["jana.novakova"],
+        quantity=8,
+        requested_date=today + timedelta(days=5),
+        justification="Firemná akcia pre 40 ľudí.",
+    )
+    return 3
+
+
 def run(quiet: bool = False) -> None:
     with SessionLocal() as db:
         permissions = sync_permissions(db)
@@ -168,10 +206,11 @@ def run(quiet: bool = False) -> None:
         created = seed_demo_users(db, roles)
         db.commit()
         barrels_created = seed_demo_barrels(db)
+        orders_created = seed_demo_orders(db)
     if not quiet:
         print(
             f"seed: roles and permissions synced, {created} demo user(s) created, "
-            f"{barrels_created} demo barrel(s) created"
+            f"{barrels_created} demo barrel(s) created, {orders_created} demo order(s) created"
         )
 
 

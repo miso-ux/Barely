@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import User
+from app.services import notifications
 
 SESSION_USER_KEY = "user_id"
 # Paths a user may visit while a password change is being enforced.
@@ -43,6 +44,8 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User | 
         request.session.clear()
         return None
     request.state.user = user
+    # The bell in the page header needs this on every page.
+    request.state.unread_notifications = notifications.unread_count(db, user)
     return user
 
 

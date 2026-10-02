@@ -30,7 +30,14 @@ Všetky účty majú heslo `Demo1234!`. Sú to len demo hodnoty zo seedu, nikdy 
 | `user` | Používateľ | |
 | `jana.novakova`, `peter.horvath` | Používateľ | Ďalší ukážkoví používatelia pre objednávky |
 
-Seed beží pri každom štarte, ale existujúce účty nemení. Zmenené heslá teda zostávajú. Seed tiež vytvorí 30 demo barelov (`B-0001` až `B-0030`) s rôznym počtom výpožičiek a stavmi, ak je evidencia prázdna. Úplný reset: `docker compose down -v`.
+Seed beží pri každom štarte, ale existujúce účty nemení. Zmenené heslá teda zostávajú. Ak je evidencia prázdna, seed tiež vytvorí 30 demo barelov (`B-0001` až `B-0030`) s rôznym počtom výpožičiek a stavmi, dve čakajúce objednávky, jednu vydanú objednávku používateľa `user` a jednu žiadosť o výnimku od `jana.novakova`. Úplný reset: `docker compose down -v`.
+
+## Demo scenár (fázy 1 až 3)
+
+1. Prihláste sa ako `user`, na nástenke vidíte voľné barely a požičané kusy s termínom vrátenia. Vytvorte objednávku (max. 5 ks) alebo žiadosť o výnimku nad limit.
+2. Prihláste sa ako `warehouse`. Zvonček ukazuje nové objednávky a žiadosti. Na `/warehouse` je prehľad skladu a vyzdvihnutí podľa dátumu. Objednávku najprv pripravte, potom vydajte. Barely vyberie systém (najviac výpožičiek pod limitom, pri rovnosti najstarší) a zobrazí ich kódy.
+3. Prihláste sa ako `supervisor`, všetko vidíte, ale nič nezmeníte.
+4. Prihláste sa ako `admin` (po zmene hesla) a upravte konfiguráciu, napríklad cenu výpožičky alebo limit kusov.
 
 ## Príkazy
 
@@ -40,6 +47,7 @@ Seed beží pri každom štarte, ale existujúce účty nemení. Zmenené heslá
 | Migrácie | `docker compose run --rm app alembic upgrade head` |
 | Nová migrácia | `docker compose run --rm app alembic revision --autogenerate -m "popis"` |
 | Seed | `docker compose run --rm app python -m app.seed` |
+| Denná úloha ručne | `docker compose run --rm app python -m app.jobs.daily` |
 | Lint | `docker compose run --rm app ruff check .` |
 | Formátovanie | `docker compose run --rm app ruff format .` |
 | Reset databázy | `docker compose down -v && docker compose up` |

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ t('orders.title') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ t('orders.title') if see_all else t('orders.my_title') }}</h1>
+  <div class="actions">
+    {% if can_create %}<a href="/orders/new" role="button">{{ t('orders.new') }}</a>{% endif %}
+    {% if see_all %}<a href="/warehouse" role="button" class="outline">{{ t('warehouse.title') }}</a>{% endif %}
+  </div>
+</div>
+
+<p>{{ t('orders.free_now', free=free) }}</p>
+
+<form method="get" action="/orders" class="grid filters-form">
+  <select name="status">
+    <option value="">{{ t('common.all') }}</option>
+    {% for s in statuses %}
+      <option value="{{ s.value }}" {% if selected == s %}selected{% endif %}>{{ t('order.status.' ~ s.value) }}</option>
+    {% endfor %}
+  </select>
+  {% if see_all %}
+    <input type="text" name="user" placeholder="{{ t('orders.user') }}" value="{{ filter_user }}">
+  {% endif %}
+  <input type="date" name="date" value="{{ filter_date }}">
+  <button type="submit" class="outline">{{ t('common.filter') }}</button>
+</form>
+
+<div class="overflow-auto">
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      {% if see_all %}<th>{{ t('orders.user') }}</th>{% endif %}
+      <th>{{ t('orders.quantity') }}</th>
+      <th>{{ t('orders.requested_date') }}</th>
+      <th>{{ t('orders.status') }}</th>
+      <th>{{ t('orders.created_at') }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for o in orders %}
+    <tr>
+      <td><a href="/orders/{{ o.id }}">#{{ o.id }}</a></td>
+      {% if see_all %}<td>{{ o.user.display_name }} <small class="muted">{{ o.user.username }}</small></td>{% endif %}
+      <td>{{ o.quantity }}</td>
+      <td>{{ o.requested_date | d }}</td>
+      <td><span class="badge badge-order-{{ o.status.value }}">{{ t('order.status.' ~ o.status.value) }}</span></td>
+      <td>{{ o.created_at | dt }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted">{{ t('orders.empty') }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

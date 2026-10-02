@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ t('orders.new') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<article class="narrow">
+  <h1>{{ t('orders.new') }}</h1>
+  <p>{{ t('orders.new_help', max=max_items, free=free) }}</p>
+  {% if error %}<p class="error-text" role="alert">{{ error }}</p>{% endif %}
+  {% set form = form or {} %}
+  <form method="post" action="/orders/new">
+    <label>{{ t('orders.quantity') }}
+      <input type="number" name="quantity" min="1" max="{{ max_items }}" value="{{ form.quantity or 1 }}" required>
+    </label>
+    <label>{{ t('orders.requested_date') }}
+      <input type="date" name="requested_date" min="{{ min_date }}" max="{{ max_date }}" value="{{ form.requested_date or default_date }}" required>
+    </label>
+    <label>{{ t('orders.note') }}
+      <input type="text" name="note" value="{{ form.note or '' }}">
+    </label>
+    <button type="submit">{{ t('orders.create_button') }}</button>
+  </form>
+  <p>{{ t('orders.need_more', max=max_items) }} <a href="/exceptions/new">{{ t('exceptions.new') }}</a></p>
+  <p><a href="/orders">{{ t('common.back') }}</a></p>
+</article>
+{% endblock %}

@@ -10,7 +10,10 @@ from app.db import get_db
 from app.i18n import t
 from app.models import Barrel, BarrelStatus, User
 from app.services import barrels as barrels_service
+from app.services import exceptions as exceptions_service
+from app.services import orders as orders_service
 from app.services import settings as settings_service
+from app.services import stock
 from app.services.errors import DomainError
 from app.web import flash, render
 
@@ -30,7 +33,7 @@ def warehouse_dashboard(
     actor: User = Depends(require_permission(Perm.BARRELS_READ)),
     db: Session = Depends(get_db),
 ):
-    free = barrels_service.free_count(db)
+    free = stock.free_count(db)
     threshold = settings_service.get_int(db, "low_stock_threshold")
     return render(
         request,
@@ -38,12 +41,14 @@ def warehouse_dashboard(
         {
             "counts": barrels_service.status_counts(db),
             "free": free,
-            "reserved": barrels_service.reserved_count(db),
+            "reserved": stock.reserved_count(db),
             "low_stock": free < threshold,
             "threshold": threshold,
             "near_limit": barrels_service.near_limit(db),
             "loan_limit": settings_service.get_int(db, "loan_limit"),
             "statuses": list(BarrelStatus),
+            "orders_by_date": orders_service.open_orders_by_date(db),
+            "pending_exceptions": exceptions_service.pending_count(db),
         },
     )
 

@@ -45,6 +45,32 @@
   {% endif %}
 </section>
 
+<section>
+  <div class="page-header">
+    <h2>{{ t('warehouse.orders_by_date') }}</h2>
+    <div class="actions">
+      <a href="/orders" role="button" class="outline">{{ t('orders.title') }}</a>
+      <a href="/exceptions" role="button" class="outline">{{ t('exceptions.title') }}{% if pending_exceptions %} ({{ pending_exceptions }}){% endif %}</a>
+    </div>
+  </div>
+  {% if orders_by_date %}
+  <table>
+    <thead><tr><th>{{ t('orders.requested_date') }}</th><th>{{ t('orders.count') }}</th><th>{{ t('orders.pieces') }}</th></tr></thead>
+    <tbody>
+      {% for day, count, pieces in orders_by_date %}
+      <tr>
+        <td><a href="/orders?date={{ day.isoformat() }}">{{ day | d }}</a></td>
+        <td>{{ count }}</td>
+        <td>{{ pieces }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">{{ t('warehouse.no_open_orders') }}</p>
+  {% endif %}
+</section>
+
 <section class="muted">
   <h2>{{ t('warehouse.later') }}</h2>
   <p>{{ t('warehouse.later_help') }}</p>

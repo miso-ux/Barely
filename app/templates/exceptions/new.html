@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ t('exceptions.new') }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<article class="narrow">
+  <h1>{{ t('exceptions.new') }}</h1>
+  <p>{{ t('exceptions.new_help', max=max_items, free=free) }}</p>
+  {% if error %}<p class="error-text" role="alert">{{ error }}</p>{% endif %}
+  {% set form = form or {} %}
+  <form method="post" action="/exceptions/new">
+    <label>{{ t('orders.quantity') }}
+      <input type="number" name="quantity" min="{{ max_items + 1 }}" value="{{ form.quantity or max_items + 1 }}" required>
+    </label>
+    <label>{{ t('orders.requested_date') }}
+      <input type="date" name="requested_date" min="{{ min_date }}" max="{{ max_date }}" value="{{ form.requested_date or default_date }}" required>
+    </label>
+    <label>{{ t('exceptions.justification') }}
+      <textarea name="justification" rows="3" required>{{ form.justification or '' }}</textarea>
+    </label>
+    <button type="submit">{{ t('exceptions.create_button') }}</button>
+  </form>
+  <p><a href="/exceptions">{{ t('common.back') }}</a></p>
+</article>
+{% endblock %}

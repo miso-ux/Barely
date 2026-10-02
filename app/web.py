@@ -1,6 +1,6 @@
 """Template rendering helpers shared by routers."""
 
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -26,7 +26,12 @@ def format_datetime(value: datetime | None) -> str:
     return value.astimezone(_LOCAL_TZ).strftime("%d.%m.%Y %H:%M")
 
 
+def format_date(value: date | None) -> str:
+    return value.strftime("%d.%m.%Y") if value else ""
+
+
 templates.env.filters["dt"] = format_datetime
+templates.env.filters["d"] = format_date
 
 
 def flash(request: Request, message: str, category: str = "info") -> None:
@@ -48,6 +53,7 @@ def render(
 ) -> HTMLResponse:
     ctx = {
         "current_user": getattr(request.state, "user", None),
+        "unread_notifications": getattr(request.state, "unread_notifications", 0),
         "flashes": request.session.pop(_FLASH_KEY, []),
         **(context or {}),
     }

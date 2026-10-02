@@ -13,7 +13,17 @@ from app.auth.deps import NotAuthenticated, PasswordChangeRequired
 from app.config import get_settings
 from app.db import get_db
 from app.i18n import t
-from app.routers import audit, auth, barrels, dashboard, settings, users
+from app.routers import (
+    audit,
+    auth,
+    barrels,
+    dashboard,
+    exceptions,
+    notifications,
+    orders,
+    settings,
+    users,
+)
 from app.web import BASE_DIR, flash, render
 
 app_settings = get_settings()
@@ -33,6 +43,9 @@ app.include_router(users.router)
 app.include_router(settings.router)
 app.include_router(audit.router)
 app.include_router(barrels.router)
+app.include_router(orders.router)
+app.include_router(exceptions.router)
+app.include_router(notifications.router)
 
 
 @app.exception_handler(NotAuthenticated)

@@ -43,7 +43,8 @@ def reset_database(database):
         conn.execute(
             text(
                 "TRUNCATE audit_log, settings, user_roles, role_permissions, "
-                "users, roles, permissions, barrel_status_history, barrels "
+                "users, roles, permissions, barrel_status_history, barrels, "
+                "notifications, loans, exception_requests, orders "
                 "RESTART IDENTITY CASCADE"
             )
         )

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ t('exceptions.request') }} #{{ item.id }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<hgroup>
+  <h1>{{ t('exceptions.request') }} #{{ item.id }}
+    <span class="badge badge-exc-{{ item.status.value }}">{{ t('exception.status.' ~ item.status.value) }}</span>
+  </h1>
+  <p>{{ item.user.display_name }} <small class="muted">{{ item.user.username }}</small> ·
+     {{ item.quantity }} {{ t('orders.pieces_short') }} · {{ t('orders.requested_date') }}: {{ item.requested_date | d }} ·
+     {{ t('orders.created_at') }}: {{ item.created_at | dt }}</p>
+</hgroup>
+
+<p><strong>{{ t('exceptions.justification') }}:</strong> {{ item.justification }}</p>
+
+{% if item.decided_at %}
+  <p>{{ t('exceptions.decided', when=item.decided_at | dt, who=item.decider.username if item.decider else '') }}
+     {% if item.decision_note %}· {{ item.decision_note }}{% endif %}</p>
+{% endif %}
+{% if item.order_id %}
+  <p><a href="/orders/{{ item.order_id }}">{{ t('exceptions.created_order', id=item.order_id) }}</a></p>
+{% endif %}
+
+{% if can_decide %}
+<section>
+  <h2>{{ t('exceptions.decide') }}</h2>
+  <form method="post" action="/exceptions/{{ item.id }}/approve" id="approve"></form>
+  <form method="post" action="/exceptions/{{ item.id }}/reject" id="reject"></form>
+  <label>{{ t('exceptions.decision_note') }}
+    <input type="text" name="note" form="approve" id="note-approve">
+  </label>
+  <input type="hidden" name="note" form="reject" id="note-reject">
+  <div class="actions">
+    <button type="submit" form="approve">{{ t('exceptions.approve') }}</button>
+    <button type="submit" form="reject" class="secondary" onclick="document.getElementById('note-reject').value=document.getElementById('note-approve').value">{{ t('exceptions.reject') }}</button>
+  </div>
+</section>
+{% endif %}
+
+<p><a href="/exceptions">{{ t('common.back') }}</a></p>
+{% endblock %}

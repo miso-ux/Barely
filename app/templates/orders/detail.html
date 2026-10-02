@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ t('orders.order') }} #{{ order.id }} · {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<hgroup>
+  <h1>{{ t('orders.order') }} #{{ order.id }}
+    <span class="badge badge-order-{{ order.status.value }}">{{ t('order.status.' ~ order.status.value) }}</span>
+  </h1>
+  <p>{{ order.user.display_name }} <small class="muted">{{ order.user.username }}</small> ·
+     {{ order.quantity }} {{ t('orders.pieces_short') }} · {{ t('orders.requested_date') }}: {{ order.requested_date | d }}</p>
+</hgroup>
+
+{% if order.note %}<p><em>{{ order.note }}</em></p>{% endif %}
+{% if order.exception_request %}
+  <p>{{ t('orders.from_exception') }} <a href="/exceptions/{{ order.exception_request.id }}">#{{ order.exception_request.id }}</a></p>
+{% endif %}
+
+{% if can_prepare or can_issue or can_cancel %}
+<section class="actions">
+  {% if can_prepare %}
+    <form method="post" action="/orders/{{ order.id }}/ready" class="inline"><button type="submit">{{ t('orders.prepare') }}</button></form>
+  {% endif %}
+  {% if can_issue %}
+    <form method="post" action="/orders/{{ order.id }}/issue" class="inline"><button type="submit">{{ t('orders.issue') }}</button></form>
+  {% endif %}
+  {% if can_cancel %}
+    <form method="post" action="/orders/{{ order.id }}/cancel" class="inline"><button type="submit" class="secondary outline">{{ t('orders.cancel') }}</button></form>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if order.loans %}
+<section>
+  <h2>{{ t('orders.assigned_barrels') }}</h2>
+  <p>{{ t('orders.assigned_help') }}</p>
+  <table>
+    <thead><tr><th>{{ t('barrels.code') }}</th><th>{{ t('loans.sequence') }}</th><th>{{ t('loans.due_date') }}</th><th>{{ t('loans.price') }}</th><th>{{ t('loans.status') }}</th></tr></thead>
+    <tbody>
+      {% for loan in order.loans %}
+      <tr>
+        <td>{% if can_manage %}<a href="/barrels/{{ loan.barrel_id }}">{{ loan.barrel.code }}</a>{% else %}{{ loan.barrel.code }}{% endif %}</td>
+        <td>{{ loan.loan_sequence }}</td>
+        <td>{{ loan.due_date | d }}</td>
+        <td>{{ loan.loan_price }} €</td>
+        <td>{{ t('loan.status.' ~ loan.status.value) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<section>
+  <h2>{{ t('orders.timeline') }}</h2>
+  <table>
+    <tbody>
+      <tr><th>{{ t('orders.step.created') }}</th><td>{{ order.created_at | dt }}</td><td>{{ order.creator.username if order.creator else '' }}</td></tr>
+      <tr><th>{{ t('orders.step.requested') }}</th><td>{{ order.requested_date | d }}</td><td></td></tr>
+      {% if order.ready_at %}<tr><th>{{ t('orders.step.ready') }}</th><td>{{ order.ready_at | dt }}</td><td>{{ order.ready_actor.username if order.ready_actor else '' }}</td></tr>{% endif %}
+      {% if order.issued_at %}<tr><th>{{ t('orders.step.issued') }}</th><td>{{ order.issued_at | dt }}</td><td>{{ order.issue_actor.username if order.issue_actor else '' }}</td></tr>{% endif %}
+      {% if order.closed_at %}<tr><th>{{ t('orders.step.closed') }}</th><td>{{ order.closed_at | dt }}</td><td></td></tr>{% endif %}
+      {% if order.cancelled_at %}<tr><th>{{ t('orders.step.cancelled') }}</th><td>{{ order.cancelled_at | dt }}</td><td>{{ order.cancel_actor.username if order.cancel_actor else t('audit.system') }} · {{ t('order.cancel_reason.' ~ order.cancel_reason) }}</td></tr>{% endif %}
+      {% for n in notifications %}
+      <tr>
+        <th>{{ t('orders.step.notification') }}</th>
+        <td>{{ n.created_at | dt }}{% if n.read_at %} → {{ t('notifications.read_at') }} {{ n.read_at | dt }}{% endif %}</td>
+        <td>{{ t(n.kind, **n.params) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<p><a href="/orders">{{ t('common.back') }}</a></p>
+{% endblock %}

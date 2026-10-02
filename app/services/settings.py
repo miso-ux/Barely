@@ -23,6 +23,10 @@ DEFAULTS: dict[str, Any] = {
     "block_debtors": True,
     "registration_enabled": False,
     "loan_price": "0.00",
+    # Q-03: how long a reservation waits after the pickup date (working days), and how far
+    # ahead an order may be placed (calendar days).
+    "reservation_validity_days": 3,
+    "order_horizon_days": 30,
     "forbidden_role_combinations": [
         ["warehouse", "invoicing"],
         ["supervisor", "warehouse"],
